@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/navigation_calendar"
+        android:icon="@drawable/chart_menu"
+        android:title="@string/title_calendar"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/navigation_chart"
+        android:icon="@drawable/chart_menu"
+        android:title="@string/title_chart"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/navigation_home"
+        android:icon="@drawable/ic_home_black_24dp"
+        android:title="@string/title_home"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/navigation_chat"
+        android:icon="@drawable/chat_menu"
+        android:title="@string/title_chat"
+        app:showAsAction="always"/>
+    <item
+        android:id="@+id/navigation_user"
+        android:icon="@drawable/chat_menu"
+        android:title="@string/title_user"
+        app:showAsAction="always"/>
+
+</menu>
