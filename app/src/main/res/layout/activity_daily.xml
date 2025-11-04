@@ -25,38 +25,87 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/daily_title_text"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent">
+        app:layout_constraintRight_toRightOf="parent"
+        >
 
         <EditText
             android:id="@+id/daily_input_title"
             android:layout_width="250sp"
-            android:layout_height="50sp"
+            android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp"
-            android:background="#555" />
+            android:hint="제목"
+            android:textSize="20sp"
+             />
 
         <EditText
             android:id="@+id/daily_input_content"
             android:layout_width="match_parent"
-            android:layout_height="300sp"
+            android:layout_height="400sp"
             android:layout_marginHorizontal="20dp"
-            android:background="@color/black"
+            android:hint="오늘 하루는 어땠나요?"
+            android:gravity="start"
+            android:inputType="textMultiLine"
+            android:scrollbars="vertical"
+            android:textSize="15sp"
             />
 
-        <ActionMenuView
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="50sp">
+            android:layout_height="50dp"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:weightSum="5">
 
-            <Button
-                android:layout_width="10sp"
-                android:layout_height="match_parent"/>
-            <Button
-                android:layout_width="10sp"
-                android:layout_height="match_parent"/>
-            <Button
-                android:layout_width="10sp"
-                android:layout_height="match_parent"/>
-        </ActionMenuView>
+            <ImageButton
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/daily_textsize_button"
+                android:contentDescription="TextSize" />
+            <ImageButton
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/daily_image_button"
+                android:contentDescription="Image" />
+            <ImageButton
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/daily_camera_button"
+                android:contentDescription="Camera" />
+
+            <ImageButton
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/daily_file_button"
+                android:contentDescription="File" />
+
+            <ImageButton
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/daily_draw_button"
+                android:contentDescription="Draw" />
+        </LinearLayout>
 
     </LinearLayout>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="20sp"
+        android:text="작성 마치기"
+        app:layout_constraintTop_toBottomOf="@id/daily_input_container"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
