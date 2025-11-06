@@ -14,7 +14,7 @@
         android:textSize="30sp"
         android:text="@string/home_welcome"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/myButton"
+        app:layout_constraintBottom_toTopOf="@id/googlyEyes"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintVertical_chainStyle="spread" />
@@ -24,18 +24,19 @@
         android:layout_width="0dp"
         android:layout_height="200dp"
         android:layout_margin="16dp"
-        app:layout_constraintTop_toBottomOf="@+id/text_home"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <Button
-        android:id="@+id/myButton"
+        android:id="@+id/daily_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/home_test_button_text"
         android:textSize="25sp"
         android:padding="30dp"
-        app:layout_constraintTop_toBottomOf="@id/text_home"
+        app:layout_constraintTop_toBottomOf="@id/googlyEyes"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

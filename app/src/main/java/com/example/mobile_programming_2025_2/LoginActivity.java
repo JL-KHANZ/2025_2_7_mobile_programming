@@ -34,6 +34,7 @@ public class LoginActivity extends AppCompatActivity {
                 switch (resultCode) {
                     case 0:
                         // 로그인 성공
+                        //
                         startActivity(new Intent(this, MainActivity.class));
                         Intent i = new Intent(LoginActivity.this, MainActivity.class);
                         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

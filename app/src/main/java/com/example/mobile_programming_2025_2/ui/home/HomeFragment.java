@@ -1,5 +1,6 @@
 package com.example.mobile_programming_2025_2.ui.home;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +12,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.mobile_programming_2025_2.databinding.FragmentHomeBinding;
+import com.example.mobile_programming_2025_2.ui.daily.ActivityDaily;
 
 public class HomeFragment extends Fragment {
 
@@ -26,6 +28,12 @@ public class HomeFragment extends Fragment {
 
         final TextView textView = binding.textHome;
         homeViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+
+        binding.dailyButton.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), ActivityDaily.class);
+            startActivity(intent);
+        });
+
         return root;
     }
 
