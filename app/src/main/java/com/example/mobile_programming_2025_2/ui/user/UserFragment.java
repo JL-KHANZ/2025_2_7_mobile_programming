@@ -10,7 +10,6 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.mobile_programming_2025_2.databinding.FragmentHomeBinding;
 import com.example.mobile_programming_2025_2.databinding.FragmentUserBinding;
 
 public class UserFragment extends Fragment {
@@ -25,8 +24,8 @@ public class UserFragment extends Fragment {
         binding = FragmentUserBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        final TextView textView = binding.textUsername;
-        usertViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+        // final TextView textView = binding.textUser; // This line is removed
+        // usertViewModel.getText().observe(getViewLifecycleOwner(), textView::setText); // This line is removed
         return root;
     }
 
