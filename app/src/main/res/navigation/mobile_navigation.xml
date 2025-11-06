@@ -9,7 +9,7 @@
         android:id="@+id/navigation_calendar"
         android:name="com.example.mobile_programming_2025_2.ui.calendar.CalendarFragment"
         android:label="@string/title_calendar"
-        tools:layout="@layout/fragment_chat" />
+        tools:layout="@layout/fragment_calendar" />
     <fragment
         android:id="@+id/navigation_chart"
         android:name="com.example.mobile_programming_2025_2.ui.chart.ChartFragment"
@@ -31,5 +31,5 @@
         android:id="@+id/navigation_user"
         android:name="com.example.mobile_programming_2025_2.ui.user.UserFragment"
         android:label="@string/title_user"
-        tools:layout="@layout/fragment_chat" />
+        tools:layout="@layout/fragment_user" />
 </navigation>
