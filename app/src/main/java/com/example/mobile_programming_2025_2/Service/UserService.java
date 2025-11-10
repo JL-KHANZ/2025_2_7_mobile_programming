@@ -19,7 +19,14 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.firestore.SetOptions;
 import java.util.HashMap;
 import java.util.Map;
-
+//users
+// └─ {uid}                  ← 문서
+//     ├─ profile            ← 하위 컬렉션
+//     │   └─ info           ← 문서 (프로필 데이터)
+//     ├─ diary              ← 하위 컬렉션
+//     │   └─ {yyyy-MM-dd}   ← 문서 (일기)
+//     └─ emotion            ← 하위 컬렉션
+//         └─ {yyyy-MM-dd}   ← 문서 (감정)
 public class UserService {
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private final FirebaseAuth auth = FirebaseAuth.getInstance();
@@ -28,7 +35,7 @@ public class UserService {
         return (u != null) ? u.getUid() : null;
     }
     private String docPath(String uid) {
-        return "users/" + uid + "/profile";// users/{uid}/profile  (컬렉션 users, 문서 uid, 하위 profile 문서 1개)
+        return "users/" + uid + "/profile/info";// users/{uid}/profile/info  (컬렉션 users, 문서 uid, 컬렉션 profile, 문서 info)
     }
 
 
