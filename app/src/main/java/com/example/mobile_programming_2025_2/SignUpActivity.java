@@ -3,12 +3,14 @@ package com.example.mobile_programming_2025_2;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.mobile_programming_2025_2.Service.SignUpService;
+import com.example.mobile_programming_2025_2.Service.UserService;
 import com.example.mobile_programming_2025_2.databinding.ActivitySignUpBinding;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -44,13 +46,25 @@ public class SignUpActivity extends AppCompatActivity {
 
                 case 0:
                     // 로그인 성공
-
-                    startActivity(new Intent(this, MainActivity.class));
-
                     setUiEnabled(true);
                     Toast.makeText(this, "회원가입 완료", Toast.LENGTH_SHORT).show();
-                    finish();
 
+                    // Firestore 기본 프로필 자동 생성
+                    UserService userService = new UserService();
+                    userService.upsertProfileFromCurrentUser()
+                            .addOnSuccessListener(aVoid -> {
+                                Log.d("LoginActivity", "기본 프로필 생성 성공");
+
+                                // Firestore 업서트 성공 후 MainActivity로 이동
+                                Intent intent = new Intent(this, MainActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                startActivity(intent);
+                                finish();
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e("LoginActivity", "기본 프로필 생성 실패", e);
+                                Toast.makeText(this, "기본 프로필 생성 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            });
                     break;
                 case -1:
                     Toast.makeText(this, "이메일 형식이 올바르지 않거나 비밀번호가 너무 짧습니다.", Toast.LENGTH_SHORT).show();
