@@ -14,5 +14,10 @@
     
 <!--    daily journal-->
     <string name="daily_journal">오늘의 일기</string>
+
+    <string-array name="language_items">
+        <item>한국어</item>
+        <item>English</item>
+    </string-array>
     
 </resources>
