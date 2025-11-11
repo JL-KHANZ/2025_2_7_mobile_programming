@@ -7,6 +7,7 @@ import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 
 import androidx.annotation.Nullable;
 
@@ -108,26 +109,58 @@ public class CircularSliderView extends View {
         canvas.drawCircle(tx, ty, thumbRadius, thumbPaint);
     }
 
+    // In CircularSliderView.java
+    private boolean isDragging = false;
+    private float touchSlop;
+    @Override protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        touchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
+    }
+
+    private boolean isNearThumb(float x, float y) {
+        // hit test: near the thumb point
+        float rad = (float) Math.toRadians(angleDeg);
+        float tx = cx + (float) Math.cos(rad) * radius;
+        float ty = cy + (float) Math.sin(rad) * radius;
+        float dx = x - tx, dy = y - ty;
+        float r = thumbRadius + touchSlop * 1.5f; // forgiving hit target
+        return (dx*dx + dy*dy) <= r*r;
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        float x = event.getX(), y = event.getY();
+
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
-            case MotionEvent.ACTION_MOVE: {
-                float x = event.getX() - cx;
-                float y = event.getY() - cy;
-                float ang = (float) Math.toDegrees(atan2(y, x));
-                // convert to -90..270 mapping (0 at top)
-                float deg = ang;
-                // clamp to 0..360 sweep as value
-                float val = angleToValue(deg);
-                this.value = (int) Math.round(val);
-                this.angleDeg = valueToAngle(this.value);
-                invalidate();
-                if (listener != null) listener.onValueChanged(this.value);
+                // Only start if the user touched near the thumb (or the track, if you prefer)
+                if (isNearThumb(x, y)) {
+                    isDragging = true;
+                    getParent().requestDisallowInterceptTouchEvent(true); // block ScrollView/ViewPager
+                    updateAngleAndValue(x, y); // your angle/value code
+                    return true;               // consume from now on
+                }
+                return false; // let other views handle this tap
+
+            case MotionEvent.ACTION_MOVE:
+                if (!isDragging) return false;
+                updateAngleAndValue(x, y);
                 return true;
-            }
+
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                if (isDragging) {
+                    isDragging = false;
+                    getParent().requestDisallowInterceptTouchEvent(false);
+                    return true;
+                }
+                return false;
         }
-        return super.onTouchEvent(event);
+        return false;
+    }
+
+    private void updateAngleAndValue(float x, float y) {
+        // your existing angle/value computation + invalidate + listener callback
     }
 
     private float valueToAngle(int v) {

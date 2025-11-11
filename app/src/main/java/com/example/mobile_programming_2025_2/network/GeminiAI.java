@@ -26,10 +26,6 @@ public class GeminiAI {
         void onError(Throwable throwable);
     }
 
-    public interface EmotionAnalysisCallback {
-        void onResponse(Map<String, Integer> emotionScores);
-        void onError(Throwable throwable);
-    }
 
     public GeminiAI() {
         GenerativeModel gm = new GenerativeModel(
