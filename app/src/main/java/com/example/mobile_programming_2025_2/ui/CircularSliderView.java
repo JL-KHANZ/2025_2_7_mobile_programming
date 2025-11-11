@@ -41,8 +41,8 @@ public class CircularSliderView extends View {
     public CircularSliderView(Context c, @Nullable AttributeSet a) { super(c, a); init(); }
 
     private void init() {
-        strokeWidth = dp(12);
-        thumbRadius = dp(12);
+        strokeWidth = dp(25);
+        thumbRadius = dp(20);
 
         trackPaint.setStyle(Paint.Style.STROKE);
         trackPaint.setStrokeWidth(strokeWidth);
@@ -98,7 +98,7 @@ public class CircularSliderView extends View {
         // draw progress arc from -90° (top) to current angle
         float sweep = normalizeSweep(angleDeg + 90f);
         if (sweep > 0f) {
-            canvas.drawArc(arcBounds, -90f, sweep, false, progressPaint);
+            // canvas.drawArc(arcBounds, -90f, sweep, false, progressPaint);
         }
 
         // draw thumb at current angle
