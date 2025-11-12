@@ -1,6 +1,7 @@
 package com.example.mobile_programming_2025_2.network;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -15,62 +16,85 @@ import java.util.concurrent.TimeUnit;
 
 import static com.google.common.truth.Truth.assertThat;
 
-/**
- * Instrumented test, which will execute on an Android device.
- * <p>
- * This test makes a REAL network request to the Gemini API to verify end-to-end functionality.
- * It requires a valid API key in local.properties and an active internet connection.
- */
 @RunWith(AndroidJUnit4.class)
 public class GeminiAITest {
 
+    // Logcat에서 필터링하기 위한 TAG를 추가합니다.
+    private static final String TAG = "GeminiAITest";
+
     @Test
     public void analyzeEmotion_whenApiCallIsSuccessful_receivesEmotionScores() throws InterruptedException {
-        // Arrange: 비동기 작업의 완료를 기다리기 위한 도구
+        // Arrange
         final CountDownLatch latch = new CountDownLatch(1);
-
-        // 비동기 결과를 저장할 변수들
         final Map<String, Integer>[] resultHolder = new Map[1];
         final Throwable[] errorHolder = new Throwable[1];
-
-        // 테스트할 텍스트
         String testText = "오늘 날씨가 정말 좋아서 친구랑 공원에서 즐겁게 놀았어!";
-
-        // GeminiAI 인스턴스 생성
         GeminiAI geminiAI = new GeminiAI();
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         Executor mainExecutor = appContext.getMainExecutor();
 
-        // Act: 감정 분석 API 호출
+        // Act
         geminiAI.analyzeEmotion(testText, mainExecutor, new GeminiAI.EmotionAnalysisCallback() {
             @Override
             public void onResponse(Map<String, Integer> emotionScores) {
-                // 성공 시 결과를 저장하고 대기 종료
+                Log.d(TAG, "[감정 분석] API 분석 성공: " + emotionScores);
                 resultHolder[0] = emotionScores;
                 latch.countDown();
             }
 
             @Override
             public void onError(Throwable throwable) {
-                // 실패 시 에러를 저장하고 콘솔에 전체 오류를 출력합니다.
-                System.err.println("API call failed inside test:");
-                throwable.printStackTrace();
+                Log.e(TAG, "[감정 분석] API 호출 실패", throwable);
                 errorHolder[0] = throwable;
                 latch.countDown();
             }
         });
 
-        // Assert: API 응답이 올 때까지 최대 30초간 대기 (시간 연장)
+        // Assert
         boolean receivedResponse = latch.await(30, TimeUnit.SECONDS);
+        assertThat(errorHolder[0]).isNull();
+        assertThat(receivedResponse).isTrue();
+        assertThat(resultHolder[0]).isNotNull();
+        assertThat(resultHolder[0].isEmpty()).isFalse();
+        assertThat(resultHolder[0].containsKey("기쁨")).isTrue();
+        Log.i(TAG, "[감정 분석] 테스트 최종 통과! 결과: " + resultHolder[0]);
+    }
 
-        // 최종 결과 검증
-        assertThat(errorHolder[0]).isNull(); // API 에러가 없었는지 먼저 확인
-        assertThat(receivedResponse).isTrue(); // 응답이 시간 내에 도착했는지 확인
-        assertThat(resultHolder[0]).isNotNull(); // 성공 결과가 null이 아닌지 확인
-        assertThat(resultHolder[0].isEmpty()).isFalse(); // 결과 맵이 비어있지 않은지 확인
-        assertThat(resultHolder[0].containsKey("기쁨")).isTrue(); // 결과에 '기쁨' 점수가 포함되어 있는지 확인
+    @Test
+    public void generateFeedback_whenApiCallIsSuccessful_receivesFeedbackString() throws InterruptedException {
+        // Arrange
+        final CountDownLatch latch = new CountDownLatch(1);
+        final String[] resultHolder = new String[1];
+        final Throwable[] errorHolder = new Throwable[1];
+        String testText = "요즘따라 일이 잘 안풀려서 너무 우울하고 힘들어."; // 피드백을 요청할 텍스트
+        GeminiAI geminiAI = new GeminiAI();
+        Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        Executor mainExecutor = appContext.getMainExecutor();
 
-        // 결과 출력
-        System.out.println("API 분석 결과: " + resultHolder[0]);
+        // Act
+        geminiAI.generateFeedback(testText, mainExecutor, new GeminiAI.FeedbackCallback() {
+            @Override
+            public void onResponse(String feedback) {
+                Log.d(TAG, "[피드백 생성] API 분석 성공: " + feedback);
+                resultHolder[0] = feedback;
+                latch.countDown();
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                Log.e(TAG, "[피드백 생성] API 호출 실패", throwable);
+                errorHolder[0] = throwable;
+                latch.countDown();
+            }
+        });
+
+        // Assert
+        boolean receivedResponse = latch.await(30, TimeUnit.SECONDS);
+        assertThat(errorHolder[0]).isNull();
+        assertThat(receivedResponse).isTrue();
+        assertThat(resultHolder[0]).isNotNull();
+        assertThat(resultHolder[0].isEmpty()).isFalse();
+        // 최종 결과를 로그로 출력합니다.
+        Log.i(TAG, "[피드백 생성] 테스트 최종 통과! 결과: " + resultHolder[0]);
     }
 }

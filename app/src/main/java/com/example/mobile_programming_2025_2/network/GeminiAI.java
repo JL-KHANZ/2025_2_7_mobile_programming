@@ -26,6 +26,11 @@ public class GeminiAI {
         void onError(Throwable throwable);
     }
 
+    public interface FeedbackCallback {
+        void onResponse(String feedback);
+        void onError(Throwable throwable);
+    }
+
     public interface EmotionAnalysisCallback {
         void onResponse(Map<String, Integer> emotionScores);
         void onError(Throwable throwable);
@@ -37,6 +42,32 @@ public class GeminiAI {
                 BuildConfig.GEMINI_API_KEY
         );
         this.generativeModel = GenerativeModelFutures.from(gm);
+    }
+
+    public void generateFeedback(String userText, Executor executor, FeedbackCallback callback) {
+        String prompt = "다음 글의 감정을 개선할 수 있는 마인드셋 방법이랑 생활 루틴을 추천해줘. 누군가에게 조언해주듯이 10문장이내로 해줘. 분석할 글: \"" + userText + "\"";
+
+        Content content = new Content.Builder()
+                .addText(prompt)
+                .build();
+
+        ListenableFuture<GenerateContentResponse> response = generativeModel.generateContent(content);
+        Futures.addCallback(response, new FutureCallback<GenerateContentResponse>() {
+            @Override
+            public void onSuccess(GenerateContentResponse result) {
+                String feedback = result.getText();
+                if (feedback == null) {
+                    callback.onError(new Exception("Received an empty response from the API."));
+                } else {
+                    callback.onResponse(feedback);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                callback.onError(t);
+            }
+        }, executor);
     }
 
     public void analyzeEmotion(String userText, Executor executor, EmotionAnalysisCallback callback) {
