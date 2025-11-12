@@ -30,17 +30,43 @@
         app:layout_constraintEnd_toEndOf="parent"
         />
 
-    <LinearLayout
-        android:id="@+id/daily_results_layout"
+    <RelativeLayout
+        android:id="@+id/daily_results_relative_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="15dp"
         app:layout_constraintTop_toBottomOf="@+id/daily_result_text"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        />
+        >
+        <LinearLayout
+            android:id="@+id/daily_results_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="15dp"
+            />
+        <LinearLayout
+            android:id="@+id/daily_placeholder_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            >
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="testing"
+                android:textSize="20sp"
+                android:gravity="center"
+                />
+        </LinearLayout>
+
+
+
+
+
+    </RelativeLayout>
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

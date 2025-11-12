@@ -49,6 +49,8 @@ public class ActivityDaily extends AppCompatActivity {
     }
 
     private void journalLayoutViews() {
+
+
         setContentView(R.layout.activity_daily_2_journal);
         Button btnJournal = findViewById(R.id.daily_journal_btn);
 
@@ -90,6 +92,8 @@ public class ActivityDaily extends AppCompatActivity {
                         uiResults.removeAllViews();
                         LayoutInflater inflater = getLayoutInflater();
 
+                        System.out.println("result => " + result);
+
                         for (Map.Entry<String, Integer> entry : result.entrySet()) {
                             String emotion = entry.getKey();
                             int score = entry.getValue();
@@ -127,6 +131,8 @@ public class ActivityDaily extends AppCompatActivity {
             };
 
             geminiAI.analyzeEmotion(content, backgroundExecutor, callback);
+
+
             setContentView(R.layout.activity_daily_3_result);
             resultLayoutViews();
         });
