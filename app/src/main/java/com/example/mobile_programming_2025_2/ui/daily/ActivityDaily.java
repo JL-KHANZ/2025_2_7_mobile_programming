@@ -31,21 +31,21 @@ public class ActivityDaily extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_daily_1_slider);
 
-        CircularSliderView slider = findViewById(R.id.circleSlider);
-        slider.setOnValueChangeListener(value -> {
-            // value is 0..100
-            // e.g., update a TextView, send to ViewModel, etc.
-            System.out.println("value => " + value);
-        });
-
-        ImageButton btnArrow = findViewById(R.id.daily_1_btn_2);
-        btnArrow.setOnClickListener(v -> {
-            setContentView(R.layout.activity_daily_2_journal);
-
-            journalLayoutViews();
-        });
-
-
+        // 감정 슬라이더 일단 주석처리 - 1차 기능 아니라 제외
+//        CircularSliderView slider = findViewById(R.id.circleSlider);
+//        slider.setOnValueChangeListener(value -> {
+//            // value is 0..100
+//            // e.g., update a TextView, send to ViewModel, etc.
+//            System.out.println("value => " + value);
+//        });
+//
+//        ImageButton btnArrow = findViewById(R.id.daily_1_btn_2);
+//        btnArrow.setOnClickListener(v -> {
+//            setContentView(R.layout.activity_daily_2_journal);
+//
+//            journalLayoutViews();
+//        });
+        journalLayoutViews();
     }
 
     private void journalLayoutViews() {
