@@ -16,7 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.mobile_programming_2025_2.R;
 import com.example.mobile_programming_2025_2.databinding.ActivityDaily1SliderBinding;
-import com.example.mobile_programming_2025_2.network.EmotionAnalysisCallback;
+import com.example.mobile_programming_2025_2.network.GeminiAI.EmotionAnalysisCallback;
 import com.example.mobile_programming_2025_2.network.GeminiAI;
 import com.example.mobile_programming_2025_2.ui.CircularSliderView;
 
