@@ -105,8 +105,11 @@ public class ActivityDaily extends AppCompatActivity {
                             scoreText.setText(score + "%");
 
                             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) scoreBar.getLayoutParams();
+                            params.width = 0;
+                            params.weight = score;
+                            scoreBar.setLayoutParams(params);
 
-
+                            uiResults.addView(barItemView);
                         }
 
 
