@@ -22,139 +22,74 @@ import com.example.mobile_programming_2025_2.network.GeminiAI.EmotionAnalysisCal
 import com.example.mobile_programming_2025_2.network.GeminiAI;
 import com.example.mobile_programming_2025_2.ui.CircularSliderView;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+// IN YOUR CURRENT FILE: ActivityDaily.java
 public class ActivityDaily extends AppCompatActivity {
 
+    // --- Keep your onCreate method simple ---
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_daily_1_slider);
-
-        // 감정 슬라이더 일단 주석처리 - 1차 기능 아니라 제외
-//        CircularSliderView slider = findViewById(R.id.circleSlider);
-//        slider.setOnValueChangeListener(value -> {
-//            // value is 0..100
-//            // e.g., update a TextView, send to ViewModel, etc.
-//            System.out.println("value => " + value);
-//        });
-//
-//        ImageButton btnArrow = findViewById(R.id.daily_1_btn_2);
-//        btnArrow.setOnClickListener(v -> {
-//            setContentView(R.layout.activity_daily_2_journal);
-//
-//            journalLayoutViews();
-//        });
-        journalLayoutViews();
+        // This Activity is now ONLY for the journal.
+        setContentView(R.layout.activity_daily_2_journal);
+        setupJournalButton();
     }
 
-    private void journalLayoutViews() {
-        setContentView(R.layout.activity_daily_2_journal);
-        Button btnJournal = findViewById(R.id.daily_journal_btn);
+    // --- Create a dedicated method to set up the button ---
+    private void setupJournalButton() {
+        // Find views ONCE and make them final to use in the listener
+        final Button btnJournal = findViewById(R.id.daily_journal_btn);
+        final EditText titleText = findViewById(R.id.daily_input_title);
+        final EditText contentText = findViewById(R.id.daily_input_content);
 
         final Handler mainHandler = new Handler(Looper.getMainLooper());
         final Executor backgroundExecutor = Executors.newSingleThreadExecutor();
         final GeminiAI geminiAI = new GeminiAI();
 
         btnJournal.setOnClickListener(v -> {
-            EditText titleText = findViewById(R.id.daily_input_title);
-            EditText contentText = findViewById(R.id.daily_input_content);
-            String title = titleText.getText().toString();
+            // 1. Get the user's input from the EditTexts.
             String content = contentText.getText().toString();
 
-            LinearLayout uiResults = findViewById(R.id.daily_results_layout);
-            LinearLayout placeholder = findViewById(R.id.daily_placeholder_view);
+            if (content.trim().isEmpty()) {
+                Toast.makeText(this, "Please write something first.", Toast.LENGTH_SHORT).show();
+                return; // Stop if input is empty
+            }
 
-//            placeholder.setVisibility(View.VISIBLE);
-//            uiResults.setVisibility(View.GONE);
+            Toast.makeText(this, "Analyzing...", Toast.LENGTH_SHORT).show();
 
+            // 2. Define the callback for when the AI is finished.
             EmotionAnalysisCallback callback = new EmotionAnalysisCallback() {
                 @Override
                 public void onResponse(Map<String, Integer> result) {
                     mainHandler.post(() -> {
-                        StringBuilder uiMessage = new StringBuilder();
-                        String topEmotion = "N/A";
-                        int highestScore = -1;
+                        // 3. START THE NEW ACTIVITY to show the results.
+                        Intent intent = new Intent(ActivityDaily.this, ActivityDailyResult.class);
 
-                        for (Map.Entry<String, Integer> entry : result.entrySet()) {
-                            String emotion = entry.getKey();
-                            int score = entry.getValue();
-                            uiMessage.append(emotion).append(": ").append(score).append("\n");
-                            if (score > highestScore) {
-                                highestScore = score;
-                                topEmotion = emotion;
-                            }
-                        }
+                        // 4. Pass the data to the new activity.
+                        // Note: Your Map and its keys/values must be Serializable.
+                        intent.putExtra("ANALYSIS_RESULT", (Serializable) result);
 
-                        // show top result
-                        TextView uiResult = findViewById(R.id.daily_result_text);
-                        uiResult.setText(topEmotion);
-
-                        // show all results
-                        uiResults.removeAllViews();
-//                        uiResults.setVisibility(View.VISIBLE);
-//                        placeholder.setVisibility(View.GONE);
-                        LayoutInflater inflater = getLayoutInflater();
-
-                        System.out.println("result => " + result);
-
-                        for (Map.Entry<String, Integer> entry : result.entrySet()) {
-                            String emotion = entry.getKey();
-                            int score = entry.getValue();
-
-                            View barItemView = inflater.inflate(R.layout.daily_result_emotion_bar, uiResults, false);
-
-                            TextView emotionLabel = barItemView.findViewById(R.id.emotion_label);
-                            View scoreBar = barItemView.findViewById(R.id.emotion_score_bar);
-                            TextView scoreText = barItemView.findViewById(R.id.emotion_score_text);
-
-                            emotionLabel.setText(emotion);
-                            scoreBar.getLayoutParams().width = (int) (score * 10);
-                            scoreText.setText(score + "%");
-
-                            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) scoreBar.getLayoutParams();
-                            params.width = 0;
-                            params.weight = score;
-                            scoreBar.setLayoutParams(params);
-
-                            uiResults.addView(barItemView);
-                        }
-
-                        // send to db here
+                        startActivity(intent);
                     });
                 }
+
                 @Override
                 public void onError(Throwable throwable) {
                     mainHandler.post(() -> {
-                        Toast.makeText(ActivityDaily.this, "오류가 발생했습니다.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ActivityDaily.this, "An error occurred during analysis.", Toast.LENGTH_SHORT).show();
                     });
                 }
-
             };
 
+            // 5. Start the background task.
             geminiAI.analyzeEmotion(content, backgroundExecutor, callback);
-
-
-            setContentView(R.layout.activity_daily_3_result);
-            resultLayoutViews();
         });
     }
 
-    private void resultLayoutViews() {
-        setContentView(R.layout.activity_daily_3_result);
-
-        ImageButton btnHome = findViewById(R.id.daily_3_btn_home);
-        btnHome.setOnClickListener(v -> {
-            startActivity(new Intent(this, MainActivity.class));
-        });
-
-        Button btnChat = findViewById(R.id.daily_3_search_chat_btn);
-        btnChat.setOnClickListener(v -> {
-            startActivity(new Intent(this, SearchChatActivity.class));
-        });
-
-    }
-
+    // --- DELETE the journalLayoutViews() and resultLayoutViews() methods ---
+    // Their logic is now handled cleanly in onCreate and the new Activity.
 }
