@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.mobile_programming_2025_2.data.ProfileUpdate;
+import com.example.mobile_programming_2025_2.data.ServiceResult;
 import com.example.mobile_programming_2025_2.data.UserProfile;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -175,120 +176,102 @@ public class UserService {
                 .addOnFailureListener(onFailure != null ? onFailure : e -> {});
     }
 
+//========================================================================================
     /**
-     * 이메일 및 비밀번호 변경 ( 비밀번호의 경우는 암호화 되어야 하기 때문에
-     * 따로 저장해 두지 않고 그때그때 authentication에서 비교함)
-     * uid는 건들지 않음
+     * 비밀번호 변경  (recent login 보장 상태 가정)
+     * Firebase Auth 계정의 비밀번호만 변경함
+     * but 실제로 로그인한지 너무 오래되면 로직이 꼬일 수 있음
+     * 총 2단계로 나뉨. recent login인 보장하기 위함 + 비밀번호 변경
+     * 1. 현재 비밀번호 확인 + recent login 처리
+     * 2. 입력받은 비밀번호로 변경
+     * 각 단계에서 적절한 예외처리 필요
+     * 1. 비밀번호가 틀렸습니다. 2. 적절하지 않은 비밀번호입니다. 비밀번호가 너무 짧습니다 등
      */
-    //todo: 한번 비밀번호 입력해야지 설정창 들어가지게
-    // 로그인한지 너무 오래되면 로직이 꼬일 수 있음
+    public Task<ServiceResult> changePassword(@NonNull String currentPassword, @NonNull String newPassword) {
 
-    //    * 최근 로그인 충족을 위한 재인증
-    //    - 보안 민감 작업(이메일/비밀번호 변경)에 필요할 수 있음
-    //    - 화면에서 기존 이메일/비밀번호를 입력받아 호출하는 것을 권장
-//    public Task<Void> reauthenticate(@NonNull String currentEmail, @NonNull String currentPassword) {
-//        FirebaseUser user = auth.getCurrentUser();
-//        if (user == null) {
-//            return Tasks.forException(new IllegalStateException("Not signed in"));
-//        }
-//        AuthCredential credential = EmailAuthProvider.getCredential(currentEmail, currentPassword);    //비밀번호 자격 증명 생성
-//        return user.reauthenticate(credential)
-//                .addOnSuccessListener(v -> Log.d("UserService", "Reauthenticate OK"))
-//                .addOnFailureListener(e -> Log.e("UserService", "Reauthenticate FAIL", e));
-//    }
-//    public Task<Void> changePasswordWithReauth(@NonNull String currentEmail,
-//                                               @NonNull String currentPassword,
-//                                               @NonNull String newPassword) {
-//        FirebaseUser user = auth.getCurrentUser();
-//        if (user == null) return Tasks.forException(new IllegalStateException("Not signed in"));
-//        if (newPassword.length() < 6) {
-//            return Tasks.forException(new IllegalArgumentException("비밀번호는 6자 이상이어야 합니다."));
-//        }
-//
-//        return reauthenticate(currentEmail, currentPassword)
-//                .onSuccessTask(v -> user.updatePassword(newPassword))
-//                .addOnSuccessListener(v -> Log.d("UserService", "Password changed after reauth"))
-//                .addOnFailureListener(e -> Log.e("UserService", "changePasswordWithReauth failed", e));
-//    }
+        FirebaseUser user = auth.getCurrentUser();
+        if (user == null) {
+            return Tasks.forResult(
+                    new ServiceResult(false, "로그인이 필요합니다.")
+            );
+        }
 
+        String email = user.getEmail();
+        //소셜 로그인도 가능해지면 이 부분 수정 (email 없을 수 도 있음)
+        //현재는 이메일 로그인만 상정하고있음
+        if (email == null) {
+            return Tasks.forResult(
+                    new ServiceResult(false, "이메일 정보를 찾을 수 없습니다.")
+            );
+        }
 
+        // 최소 검증 / 물론 authentication에서 검증 해주긴 하는데 혹시 몰라서
+        if (newPassword.length() < 6) {
+            return Tasks.forResult(
+                    new ServiceResult(false, "새 비밀번호는 6자 이상이어야 합니다.")
+            );
+        }
 
+        AuthCredential credential =
+                EmailAuthProvider.getCredential(email, currentPassword);
 
+        //  재인증 
+        return user.reauthenticate(credential)
+                .onSuccessTask(v -> user.updatePassword(newPassword))   //재인증 성고시 비밀번호 변경
+                .continueWith(task -> {
 
+                    if (task.isSuccessful()) {
+                        return new ServiceResult(true, "비밀번호가 성공적으로 변경되었습니다.");//비밀번호 변경 성공시 serviceResult에 성공 메세지 담음
+                    }
 
-//=========================================================================================================Email
-    // updateEmail은 더이상 권장되지 않음.
-    //    * 새 이메일로 '검증 메일' 보내기 (verifyBeforeUpdateEmail)
-    //    - 사용자가 메일의 링크를 클릭해 소유를 증명하면, Auth의 이메일이 실제로 변경됨
-    //    - locale: 검증 메일 언어코드(예: "ko") - null이면 기본
-    //    - acs(ActionCodeSettings): 검증 메일 동작 옵션 - null이면 기본값으로 구성해서 사용
-//    public Task<Void> requestEmailChangeWithVerification(@NonNull String newEmail,
-//                                                         @Nullable String locale,
-//                                                         @Nullable ActionCodeSettings acs) {
-//        FirebaseUser user = auth.getCurrentUser();
-//        if (user == null) {
-//            return Tasks.forException(new IllegalStateException("Not signed in"));
-//        }
-//
-//        // (선택) 검증 메일 언어 설정
-//        if (locale != null) {
-//            auth.setLanguageCode(locale);
-//        }
-//
-//        // 기본 ActionCodeSettings (필요 시 프로젝트에 맞게 조정)
-//        if (acs == null) {
-//            acs = new ActionCodeSettings.Builder()
-//                    // 검증 완료 후 돌아올 패키지 (안드로이드 앱 패키지)
-//                    .setAndroidPackageName("com.example.mobile_programming_2025_2", true, null)
-//                    // 앱 내에서 코드 처리할지 여부 (false여도 브라우저에서 처리 가능)
-//                    .setHandleCodeInApp(false)
-//                    // 필요 시 URL을 설정하여 웹 리디렉션 가능 (.setUrl("https://example.com/finishEmailChange"))
-//                    .build();
-//        }
-//
-//        // (중요) 재인증이 오래되면 RecentLoginRequired 예외가 발생할 수 있음 → 위 reauthenticate 먼저 수행 권장
-//        return user.verifyBeforeUpdateEmail(newEmail, acs)
-//                .addOnSuccessListener(v -> Log.d("UserService", "Verification email sent to: " + newEmail))
-//                .addOnFailureListener(e -> {
-//                    if (e instanceof FirebaseAuthRecentLoginRequiredException) {
-//                        Log.e("UserService", "Recent login required. Reauthenticate first.", e);
-//                    } else {
-//                        Log.e("UserService", "verifyBeforeUpdateEmail failed", e);
-//                    }
-//                });
-//    }
+                    // 예외 → 사용자 메시지 변환
+                    Exception e = task.getException();
+                    String msg = convertError(e);
+                    return new ServiceResult(false, msg);
+                });
+    }
 
+    /**
+    * Firebase Auth Exception → 사용자 메시지 변환
+     * 실제 exception은 여러 케이스를 묶어서 발생하는데
+     * 그걸 문자열을 나눠서 구분하는 방법(firebase 문서 추천)
+     *  todo: 모든 케이스 테스트 해봐야함
+    */
+    private String convertError(Exception e) {
 
-    //   * 사용자가 이메일 링크를 클릭해 검증을 완료한 뒤,
-    //    -앱 복귀 시 Auth의 사용자 정보를 새로고침(reload)하고
-    //    -Firestore(users/{uid}/profile/info)의 email 필드도 동기화
-//    public Task<Void> syncEmailFromAuthToFirestore() {
-//        FirebaseUser user = auth.getCurrentUser();
-//        if (user == null) {
-//            return Tasks.forException(new IllegalStateException("Not signed in"));
-//        }
-//
-//        // 1) Auth 정보 최신화
-//        return user.reload()
-//                .continueWithTask(t -> {
-//                    if (!t.isSuccessful()) throw t.getException();
-//
-//                    // 2) 최신 이메일을 Firestore에도 반영
-//                    String uid = user.getUid();
-//                    String email = user.getEmail(); // 검증 완료된 새 이메일
-//                    DocumentReference doc = db.document(docPath(uid));
-//
-//                    Map<String, Object> up = new HashMap<>();
-//                    up.put("email", email);
-//                    up.put("updatedAt", com.google.firebase.firestore.FieldValue.serverTimestamp());
-//
-//                    return doc.set(up, SetOptions.merge());
-//                })
-//                .addOnSuccessListener(v -> Log.d("UserService", "Firestore email synced from Auth"))
-//                .addOnFailureListener(e -> Log.e("UserService", "Sync email to Firestore failed", e));
-//    }
+        if (e == null) return "알 수 없는 오류가 발생했습니다.";
+        String raw = e.getMessage();
+        if (raw == null) return "알 수 없는 오류가 발생했습니다.";
 
+        raw = raw.toLowerCase();
 
+        if (raw.contains("password is invalid") || raw.contains("invalid password")) {
+            return "현재 비밀번호가 올바르지 않습니다.";
+        }
+        if (raw.contains("weak-password")) {
+            return "비밀번호가 너무 약합니다. 6자 이상 입력해주세요.";
+        }
+        if (raw.contains("recent login")) {
+            return "보안을 위해 다시 로그인해야 합니다.";
+        }
+        if (raw.contains("too many failed")) {
+            return "시도 횟수가 너무 많습니다. 잠시 후 다시 시도해주세요.";
+        }
+        if (raw.contains("network error")) {
+            return "네트워크 연결을 확인해주세요.";
+        }
+
+        return "오류가 발생했습니다: " + e.getMessage();
+    }
+
+//========================================================================================
+    /**
+     * 요청에 따라 account 삭제
+     * 삭제시 비밀번호 입력받아야함
+     * 진짜 삭제할건지 검증
+     * */
+    //todo:계정 삭제 authentication, firestore, storage 모두 삭제
+//    public Task<Void> deleteMyAccount() {}
 
 }
 
