@@ -14,7 +14,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.mobile_programming_2025_2.MainActivity;
 import com.example.mobile_programming_2025_2.R;
+import com.example.mobile_programming_2025_2.SearchChatActivity;
 import com.example.mobile_programming_2025_2.databinding.ActivityDaily1SliderBinding;
 import com.example.mobile_programming_2025_2.network.GeminiAI.EmotionAnalysisCallback;
 import com.example.mobile_programming_2025_2.network.GeminiAI;
@@ -49,8 +51,6 @@ public class ActivityDaily extends AppCompatActivity {
     }
 
     private void journalLayoutViews() {
-
-
         setContentView(R.layout.activity_daily_2_journal);
         Button btnJournal = findViewById(R.id.daily_journal_btn);
 
@@ -59,11 +59,16 @@ public class ActivityDaily extends AppCompatActivity {
         final GeminiAI geminiAI = new GeminiAI();
 
         btnJournal.setOnClickListener(v -> {
-            setContentView(R.layout.activity_daily_2_journal);
             EditText titleText = findViewById(R.id.daily_input_title);
             EditText contentText = findViewById(R.id.daily_input_content);
             String title = titleText.getText().toString();
             String content = contentText.getText().toString();
+
+            LinearLayout uiResults = findViewById(R.id.daily_results_layout);
+            LinearLayout placeholder = findViewById(R.id.daily_placeholder_view);
+
+//            placeholder.setVisibility(View.VISIBLE);
+//            uiResults.setVisibility(View.GONE);
 
             EmotionAnalysisCallback callback = new EmotionAnalysisCallback() {
                 @Override
@@ -88,8 +93,9 @@ public class ActivityDaily extends AppCompatActivity {
                         uiResult.setText(topEmotion);
 
                         // show all results
-                        LinearLayout uiResults = findViewById(R.id.daily_results_layout);
                         uiResults.removeAllViews();
+//                        uiResults.setVisibility(View.VISIBLE);
+//                        placeholder.setVisibility(View.GONE);
                         LayoutInflater inflater = getLayoutInflater();
 
                         System.out.println("result => " + result);
@@ -116,8 +122,6 @@ public class ActivityDaily extends AppCompatActivity {
                             uiResults.addView(barItemView);
                         }
 
-
-
                         // send to db here
                     });
                 }
@@ -140,6 +144,16 @@ public class ActivityDaily extends AppCompatActivity {
 
     private void resultLayoutViews() {
         setContentView(R.layout.activity_daily_3_result);
+
+        ImageButton btnHome = findViewById(R.id.daily_3_btn_home);
+        btnHome.setOnClickListener(v -> {
+            startActivity(new Intent(this, MainActivity.class));
+        });
+
+        Button btnChat = findViewById(R.id.daily_3_search_chat_btn);
+        btnChat.setOnClickListener(v -> {
+            startActivity(new Intent(this, SearchChatActivity.class));
+        });
 
     }
 
