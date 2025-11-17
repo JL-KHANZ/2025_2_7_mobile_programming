@@ -34,6 +34,18 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicInteger;
+// "2025-11-01" : DailyEntry {
+//    date = "2025-11-01",
+//            content = "오랜만에 친구를 만나서 즐거웠다!",
+//            feedback = { wormWord = "오늘도 충분히 잘해내고 있어요",
+//                    mindset = "긍정적인 마음가짐이 중요합니다",
+//                    feedback1 = "친구와의 관계는 큰 힘이 돼요",
+//                    feedback2 = "적당한 휴식도 필요해요"},
+//            emotions = { "기쁨" = 9, "신뢰" = 6, "슬픔" = 1, … },
+//    topEmotion = "기쁨",
+//            createdAt = 2025-11-01T10:23:43Z,
+//            updatedAt = 2025-11-01T10:30:12Z
+
 
 /** users/{uid}/dailyEntry 전용 서비스 (최근 3개월 유지 + 금일 저장 + 임의기간 조회) */
 public class DailyEntryService {
@@ -258,7 +270,7 @@ public class DailyEntryService {
             batch.commit()
                     .addOnSuccessListener(v -> {
                         deletedCount.addAndGet(docs.size());
-                        Log.d(TAG, "🗑 삭제 진행 중... 현재까지 삭제: " + deletedCount.get());
+                        Log.d(TAG, " 삭제 진행 중 & 현재까지 삭제: " + deletedCount.get());
                         pruneDailyBatch(uid, cutoff, docs.get(docs.size() - 1), deletedCount, tcs);
                     })
                     .addOnFailureListener(tcs::setException);
