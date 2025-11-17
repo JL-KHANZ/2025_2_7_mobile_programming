@@ -46,7 +46,27 @@ public class ActivityDailyResult extends AppCompatActivity {
         TextView uiTopResult = findViewById(R.id.daily_result_text);
         LayoutInflater inflater = getLayoutInflater();
 
+        for (Map.Entry<String, Integer> entry : result.entrySet()) {
+            String emotion = entry.getKey();
+            int score = entry.getValue();
 
+            View barItemView = inflater.inflate(R.layout.daily_result_emotion_bar, uiResults, false);
+
+            TextView emotionLabel = barItemView.findViewById(R.id.emotion_label);
+            View scoreBar = barItemView.findViewById(R.id.emotion_score_bar);
+            TextView scoreText = barItemView.findViewById(R.id.emotion_score_text);
+
+            emotionLabel.setText(emotion);
+            scoreBar.getLayoutParams().width = (int) (score * 10);
+            scoreText.setText(score + "%");
+
+            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) scoreBar.getLayoutParams();
+            params.width = 0;
+            params.weight = score;
+            scoreBar.setLayoutParams(params);
+
+            uiResults.addView(barItemView);
+        }
     }
 
     private void setupActionButtons() {
