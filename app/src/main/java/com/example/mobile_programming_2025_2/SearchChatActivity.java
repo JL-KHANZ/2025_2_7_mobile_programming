@@ -12,5 +12,6 @@ public class SearchChatActivity extends AppCompatActivity {
         setContentView(R.layout.activity_search_chat);
 
 
+
     }
 }

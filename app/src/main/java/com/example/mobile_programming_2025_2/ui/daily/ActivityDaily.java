@@ -19,6 +19,7 @@ import com.example.mobile_programming_2025_2.R;
 import com.example.mobile_programming_2025_2.SearchChatActivity;
 import com.example.mobile_programming_2025_2.databinding.ActivityDaily1SliderBinding;
 import com.example.mobile_programming_2025_2.network.GeminiAI.EmotionAnalysisCallback;
+import com.example.mobile_programming_2025_2.network.GeminiAI.FeedbackCallback;
 import com.example.mobile_programming_2025_2.network.GeminiAI;
 import com.example.mobile_programming_2025_2.ui.CircularSliderView;
 
@@ -44,7 +45,6 @@ public class ActivityDaily extends AppCompatActivity {
     private void setupJournalButton() {
         // Find views ONCE and make them final to use in the listener
         final Button btnJournal = findViewById(R.id.daily_journal_btn);
-        final EditText titleText = findViewById(R.id.daily_input_title);
         final EditText contentText = findViewById(R.id.daily_input_content);
 
         final Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -98,7 +98,7 @@ public class ActivityDaily extends AppCompatActivity {
             };
 
             geminiAI.analyzeEmotion(content, backgroundExecutor, emotionCallback);
-            geminiAI.generateFeedback(content, backgroundExecutor, feedbackCallback);
+//            geminiAI.generateFeedback(content, backgroundExecutor, feedbackCallback);
         });
     }
 
