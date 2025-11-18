@@ -24,6 +24,14 @@ public class UserFragment extends Fragment {
         binding = FragmentUserBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+        binding.passwordChange.setOnClickListener(v -> {
+            View panel = binding.passwordInline;
+            if (panel.getVisibility() == View.VISIBLE) {
+                panel.setVisibility(View.GONE);
+            } else {
+                panel.setVisibility(View.VISIBLE);
+            }
+        });
         // final TextView textView = binding.textUser; // This line is removed
         // usertViewModel.getText().observe(getViewLifecycleOwner(), textView::setText); // This line is removed
         return root;

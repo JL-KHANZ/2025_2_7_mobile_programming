@@ -12,6 +12,7 @@
         android:layout_height="112dp"
         android:layout_marginTop="80dp"
         android:scaleType="centerCrop"
+        android:contentDescription="사용자 이미지"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
@@ -60,15 +61,14 @@
                 android:layout_weight="1"
                 android:text="이메일"
                 />
-            <EditText
+            <TextView
                 android:id="@+id/email_input"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="16dp"
-                android:inputType="textEmailAddress"
                 android:maxLines="1"
-                android:hint="example@email.com"/>
+                android:text="example@email.com"/>
         </LinearLayout>
 
         <View
@@ -79,7 +79,7 @@
             android:background="#BBBBBB"/>
 
         <LinearLayout
-            android:id="@+id/user_password"
+            android:id="@+id/password_change"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:gravity="center_vertical"
@@ -100,7 +100,7 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/password_expand"
+            android:id="@+id/password_Inline"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -212,7 +212,7 @@
                 />
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
-                android:layout_width="100dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp"
