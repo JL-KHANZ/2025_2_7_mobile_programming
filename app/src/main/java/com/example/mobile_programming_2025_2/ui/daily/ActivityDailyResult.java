@@ -16,31 +16,36 @@ import com.example.mobile_programming_2025_2.R;
 import com.example.mobile_programming_2025_2.SearchChatActivity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 public class ActivityDailyResult extends AppCompatActivity {
+
+    public static final String ANALYSIS_RESULT = "ANALYSIS_RESULT";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_daily_3_result);
 
-        // 1. Get the analysis results passed from the previous activity
-        Map<String, Integer> result = (Map<String, Integer>) getIntent().getSerializableExtra("ANALYSIS_RESULT");
+        HashMap<String, Object> combinedData = (HashMap<String, Object>) getIntent().getSerializableExtra(ANALYSIS_RESULT);
+        Map<String, Integer> emotionResult = (Map<String, Integer>) combinedData.get("emotion_data");
+        String feedbackResult = (String) combinedData.get("feedback_data");
 
-        // 2. Display the results and set up the buttons
-        displayResults(result);
+        displayEmotionResults(emotionResult);
+        displayFeedbackResults(feedbackResult);
+
+        sendToDB(emotionResult, feedbackResult);
+
         setupActionButtons();
     }
 
-    private void displayResults(Map<String, Integer> result) {
-        // This is the logic you had in your onResponse callback
-
+    private void displayEmotionResults(Map<String, Integer> result) {
         if (result == null || result.isEmpty()) {
             System.out.println("result is null or empty");
             return;
         }
-        System.out.println(result);
 
         LinearLayout uiResults = findViewById(R.id.daily_results_layout);
         TextView uiTopResult = findViewById(R.id.daily_result_text);
@@ -57,8 +62,8 @@ public class ActivityDailyResult extends AppCompatActivity {
             TextView scoreText = barItemView.findViewById(R.id.emotion_score_text);
 
             emotionLabel.setText(emotion);
-            scoreBar.getLayoutParams().width = (int) (score * 10);
-            scoreText.setText(score + "%");
+            scoreBar.getLayoutParams().width = (int) (score * 100);
+            scoreText.setText(score);
 
             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) scoreBar.getLayoutParams();
             params.width = 0;
@@ -67,6 +72,16 @@ public class ActivityDailyResult extends AppCompatActivity {
 
             uiResults.addView(barItemView);
         }
+    }
+
+    private void displayFeedbackResults(String result) {
+        LinearLayout uiFeedbackResutls = findViewById(R.id.daily_feedback_results_layout);
+
+
+    }
+
+    private void sendToDB(Map<String, Integer> emotionResult, String feedbackResult) {
+
     }
 
     private void setupActionButtons() {

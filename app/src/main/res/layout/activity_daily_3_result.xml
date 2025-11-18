@@ -11,8 +11,8 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:text="오늘 당신의 감정은:"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toTopOf="@id/daily_results_relative_layout"
+        android:textSize="25sp"
+        android:padding="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -21,13 +21,52 @@
         android:id="@+id/daily_result_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:gravity="center"
-        android:text="placeholder"
-        android:textSize="40sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/daily_result_title" />
+        app:layout_constraintTop_toBottomOf="@+id/daily_result_title"
+        app:layout_constraintBottom_toTopOf="@id/daily_results_relative_layout"
+        />
+
+    <RelativeLayout
+        android:id="@+id/daily_results_relative_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@id/daily_3_search_chat_btn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/daily_result_text">
+
+        <LinearLayout
+            android:id="@+id/daily_results_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="15dp"
+            >
+
+        </LinearLayout>
+        <!--        placeholder-->
+        <LinearLayout
+            android:id="@+id/daily_placeholder_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+
+            >
+
+        </LinearLayout>
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/daily_feedback_results_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@id/daily_3_search_chat_btn"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/daily_results_relative_layout"
+        />
 
     <Button
         android:id="@+id/daily_3_search_chat_btn"
@@ -50,38 +89,5 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
-
-    <RelativeLayout
-        android:id="@+id/daily_results_relative_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/daily_result_text">
-
-        <LinearLayout
-            android:id="@+id/daily_results_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="15dp">
-
-        </LinearLayout>
-        <!--        placeholder-->
-        <LinearLayout
-            android:id="@+id/daily_placeholder_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:text="testing"
-                android:textSize="20sp" />
-        </LinearLayout>
-    </RelativeLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
