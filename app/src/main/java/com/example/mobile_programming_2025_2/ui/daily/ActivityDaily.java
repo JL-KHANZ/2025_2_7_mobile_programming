@@ -63,14 +63,14 @@ public class ActivityDaily extends AppCompatActivity {
 
             EmotionAnalysisCallback emotionCallback = new EmotionAnalysisCallback() {
                 @Override
-                public void onResponse(Map<String, Integer> result) {
+                public void onResponse(Map<String, Object> result) {
                     FeedbackCallback feedbackCallback = new FeedbackCallback() {
                         @Override
-                        public void onResponse(String feedback) {
+                        public void onResponse(Map<String, Object> feedback) {
 
                             Map<String, Object> combinedResult = new HashMap<>();
                             combinedResult.put("emotion_data", (Serializable) result);
-                            combinedResult.put("feedback_data", feedback);
+                            combinedResult.put("feedback_data", (Serializable) feedback);
 
                             mainHandler.post(() -> {
 
