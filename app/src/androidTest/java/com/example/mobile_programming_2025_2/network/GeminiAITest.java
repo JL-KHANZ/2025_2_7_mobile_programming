@@ -19,14 +19,14 @@ import static com.google.common.truth.Truth.assertThat;
 @RunWith(AndroidJUnit4.class)
 public class GeminiAITest {
 
-    // Logcat에서 필터링하기 위한 TAG를 추가합니다.
     private static final String TAG = "GeminiAITest";
 
     @Test
     public void analyzeEmotion_whenApiCallIsSuccessful_receivesEmotionScores() throws InterruptedException {
         // Arrange
         final CountDownLatch latch = new CountDownLatch(1);
-        final Map<String, Integer>[] resultHolder = new Map[1];
+        // 결과 타입을 Map<String, Object>로 변경합니다.
+        final Map<String, Object>[] resultHolder = new Map[1];
         final Throwable[] errorHolder = new Throwable[1];
         String testText = "오늘 날씨가 정말 좋아서 친구랑 공원에서 즐겁게 놀았어!";
         GeminiAI geminiAI = new GeminiAI();
@@ -34,9 +34,10 @@ public class GeminiAITest {
         Executor mainExecutor = appContext.getMainExecutor();
 
         // Act
+        // 콜백의 onResponse 파라미터 타입을 Map<String, Object>로 변경합니다.
         geminiAI.analyzeEmotion(testText, mainExecutor, new GeminiAI.EmotionAnalysisCallback() {
             @Override
-            public void onResponse(Map<String, Integer> emotionScores) {
+            public void onResponse(Map<String, Object> emotionScores) {
                 Log.d(TAG, "[감정 분석] API 분석 성공: " + emotionScores);
                 resultHolder[0] = emotionScores;
                 latch.countDown();
@@ -56,27 +57,31 @@ public class GeminiAITest {
         assertThat(receivedResponse).isTrue();
         assertThat(resultHolder[0]).isNotNull();
         assertThat(resultHolder[0].isEmpty()).isFalse();
+        // 주요 키가 포함되어 있는지 확인하는 방식으로 테스트를 개선합니다.
         assertThat(resultHolder[0].containsKey("기쁨")).isTrue();
+        assertThat(resultHolder[0].containsKey("분석 감정")).isTrue();
         Log.i(TAG, "[감정 분석] 테스트 최종 통과! 결과: " + resultHolder[0]);
     }
 
     @Test
-    public void generateFeedback_whenApiCallIsSuccessful_receivesFeedbackString() throws InterruptedException {
+    public void generateFeedback_whenApiCallIsSuccessful_receivesFeedbackMap() throws InterruptedException {
         // Arrange
         final CountDownLatch latch = new CountDownLatch(1);
-        final String[] resultHolder = new String[1];
+        // 결과 타입을 String[]에서 Map<String, Object>[]로 변경합니다.
+        final Map<String, Object>[] resultHolder = new Map[1];
         final Throwable[] errorHolder = new Throwable[1];
-        String testText = "요즘따라 일이 잘 안풀려서 너무 우울하고 힘들어."; // 피드백을 요청할 텍스트
+        String testText = "요즘따라 일이 잘 안풀려서 너무 우울하고 힘들어.";
         GeminiAI geminiAI = new GeminiAI();
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         Executor mainExecutor = appContext.getMainExecutor();
 
         // Act
+        // 콜백의 onResponse 파라미터 타입을 Map<String, Object>로 변경합니다.
         geminiAI.generateFeedback(testText, mainExecutor, new GeminiAI.FeedbackCallback() {
             @Override
-            public void onResponse(String feedback) {
-                Log.d(TAG, "[피드백 생성] API 분석 성공: " + feedback);
-                resultHolder[0] = feedback;
+            public void onResponse(Map<String, Object> feedbackMap) {
+                Log.d(TAG, "[피드백 생성] API 분석 성공: " + feedbackMap);
+                resultHolder[0] = feedbackMap;
                 latch.countDown();
             }
 
@@ -94,7 +99,9 @@ public class GeminiAITest {
         assertThat(receivedResponse).isTrue();
         assertThat(resultHolder[0]).isNotNull();
         assertThat(resultHolder[0].isEmpty()).isFalse();
-        // 최종 결과를 로그로 출력합니다.
+        // 주요 키가 포함되어 있는지 확인하는 방식으로 테스트를 개선합니다.
+        assertThat(resultHolder[0].containsKey("공감")).isTrue();
+        assertThat(resultHolder[0].containsKey("마인드셋 방법")).isTrue();
         Log.i(TAG, "[피드백 생성] 테스트 최종 통과! 결과: " + resultHolder[0]);
     }
 }
