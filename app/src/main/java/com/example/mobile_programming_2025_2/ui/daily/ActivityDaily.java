@@ -79,26 +79,26 @@ public class ActivityDaily extends AppCompatActivity {
 
                                 startActivity(intent);
                             });
-
                         }
-
                         @Override
                         public void onError(Throwable throwable) {
+                            mainHandler.post(() -> {
+                                Toast.makeText(ActivityDaily.this, "An error occurred during feedback analysis.", Toast.LENGTH_SHORT).show();
+                            });
 
                         }
                     };
+                    geminiAI.generateFeedback(content, backgroundExecutor, feedbackCallback);
                 }
-
                 @Override
                 public void onError(Throwable throwable) {
                     mainHandler.post(() -> {
-                        Toast.makeText(ActivityDaily.this, "An error occurred during analysis.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ActivityDaily.this, "An error occurred during emotion analysis.", Toast.LENGTH_SHORT).show();
                     });
                 }
             };
 
             geminiAI.analyzeEmotion(content, backgroundExecutor, emotionCallback);
-//            geminiAI.generateFeedback(content, backgroundExecutor, feedbackCallback);
         });
     }
 

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -14,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.mobile_programming_2025_2.MainActivity;
 import com.example.mobile_programming_2025_2.R;
 import com.example.mobile_programming_2025_2.SearchChatActivity;
+import com.example.mobile_programming_2025_2.Service.DailyEntryService;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -32,16 +34,17 @@ public class ActivityDailyResult extends AppCompatActivity {
         HashMap<String, Object> combinedData = (HashMap<String, Object>) getIntent().getSerializableExtra(ANALYSIS_RESULT);
         Map<String, Integer> emotionResult = (Map<String, Integer>) combinedData.get("emotion_data");
         String feedbackResult = (String) combinedData.get("feedback_data");
+        String topEmotion = "기쁨";
 
-        displayEmotionResults(emotionResult);
+        displayEmotionResults(emotionResult, topEmotion);
         displayFeedbackResults(feedbackResult);
 
-        sendToDB(emotionResult, feedbackResult);
+        sendToDB(emotionResult, topEmotion, feedbackResult);
 
         setupActionButtons();
     }
 
-    private void displayEmotionResults(Map<String, Integer> result) {
+    private void displayEmotionResults(Map<String, Integer> result, String topEmotion) {
         if (result == null || result.isEmpty()) {
             System.out.println("result is null or empty");
             return;
@@ -49,6 +52,9 @@ public class ActivityDailyResult extends AppCompatActivity {
 
         LinearLayout uiResults = findViewById(R.id.daily_results_layout);
         TextView uiTopResult = findViewById(R.id.daily_result_text);
+
+        uiTopResult.setText(topEmotion);
+
         LayoutInflater inflater = getLayoutInflater();
 
         for (Map.Entry<String, Integer> entry : result.entrySet()) {
@@ -63,7 +69,7 @@ public class ActivityDailyResult extends AppCompatActivity {
 
             emotionLabel.setText(emotion);
             scoreBar.getLayoutParams().width = (int) (score * 100);
-            scoreText.setText(score);
+            scoreText.setText(Integer.toString(score));
 
             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) scoreBar.getLayoutParams();
             params.width = 0;
@@ -75,12 +81,20 @@ public class ActivityDailyResult extends AppCompatActivity {
     }
 
     private void displayFeedbackResults(String result) {
-        LinearLayout uiFeedbackResutls = findViewById(R.id.daily_feedback_results_layout);
-
-
+        LinearLayout uiFeedbackResults = findViewById(R.id.daily_feedback_results_layout);
+        TextView uiText = new TextView(ActivityDailyResult.this);
+        uiText.setText(result);
+        uiFeedbackResults.addView(uiText);
     }
 
-    private void sendToDB(Map<String, Integer> emotionResult, String feedbackResult) {
+    private void sendToDB(Map<String, Integer> emotionResult, String topEmotion, String feedbackResult) {
+        EditText content = findViewById(R.id.daily_input_content);
+        String contentText = content.getText().toString();
+
+        DailyEntryService dailyEntryService = new DailyEntryService();
+        dailyEntryService.setDate(contentText);
+        dailyEntryService.upsertTodayContent(contentText);
+        dailyEntryService.upsertTodayEmotion(emotionResult, topEmotion);
 
     }
 

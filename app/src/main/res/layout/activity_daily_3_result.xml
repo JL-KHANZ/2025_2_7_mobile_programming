@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-
     <TextView
         android:id="@+id/daily_result_title"
         android:layout_width="wrap_content"
@@ -21,6 +20,9 @@
         android:id="@+id/daily_result_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="기쁨"
+        android:textSize="35sp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/daily_result_title"
@@ -31,7 +33,7 @@
         android:id="@+id/daily_results_relative_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@id/daily_3_search_chat_btn"
+        app:layout_constraintBottom_toTopOf="@id/daily_feedback_results_layout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/daily_result_text">
@@ -51,7 +53,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-
             >
 
         </LinearLayout>
@@ -60,34 +61,55 @@
     <LinearLayout
         android:id="@+id/daily_feedback_results_layout"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="200sp"
         android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@id/daily_3_search_chat_btn"
+        app:layout_constraintBottom_toTopOf="@id/daily_results_buttons_layout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/daily_results_relative_layout"
-        />
+        >
 
-    <Button
-        android:id="@+id/daily_3_search_chat_btn"
+        <ScrollView
+            android:id="@+id/daily_results_mindset_scrollview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/daily_results_buttons_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="대화 상대 찾기"
-        android:padding="20dp"
-        app:layout_constraintBottom_toTopOf="@id/daily_3_btn_home"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <ImageButton
-        android:id="@+id/daily_3_btn_home"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_home_black_24dp"
-        android:background="@color/white"
-        android:padding="20dp"
-        android:layout_marginVertical="20dp"
+        android:orientation="horizontal"
+        android:layout_marginVertical="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        >
+
+        <Button
+            android:id="@+id/daily_3_search_chat_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="대화 상대 찾기"
+            android:padding="20dp"
+            app:layout_constraintBottom_toTopOf="@id/daily_3_btn_home"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <ImageButton
+            android:id="@+id/daily_3_btn_home"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_home_black_24dp"
+            android:background="@color/white"
+            android:padding="23dp"
+            android:layout_marginHorizontal="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
