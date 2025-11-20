@@ -19,7 +19,7 @@ import org.json.JSONObject;
 
 import java.util.Iterator;
 import java.util.Map;
-import java.util.TreeMap; // TreeMap을 사용하여 키(key)를 기준으로 자동 정렬합니다.
+import java.util.TreeMap;
 import java.util.concurrent.Executor;
 
 public class GeminiAI {
@@ -29,7 +29,6 @@ public class GeminiAI {
     private static final int MAX_RETRIES = 3; // 최대 재시도 횟수
     private static final long INITIAL_BACKOFF_MS = 2000; // 초기 대기 시간 (2초)
 
-    // --- 콜백 인터페이스들 ---
     public interface FeedbackCallback {
         void onResponse(Map<String, Object> feedbackMap);
         void onError(Throwable throwable);
@@ -48,7 +47,6 @@ public class GeminiAI {
         this.generativeModel = GenerativeModelFutures.from(gm);
     }
 
-    // --- 공개 API 메소드들 ---
     public void generateFeedback(String userText, Executor executor, FeedbackCallback callback) {
         String prompt = "다음 글의 감정을 공감하고 개선할 수 있는 마인드셋 방법 1가지와 생활 루틴 2개를 추천해줘. " + "결과는 반드시 JSON 형식으로 '공감', '마인드셋 방법', '생활 루틴 1', '생활 루틴 2'를 key로, 각각에 해당하는 내용을 value로 반환해줘. 다른 부가적인 설명은 절대 추가하지 마. " + "예시: {\\\"공감\\\": \\\"...\\\", \\\"마인드셋 방법\\\": \\\"...\\\", \\\"생활 루틴 1\\\": \\\"...\\\", \\\"생활 루틴 2\\\": \\\"...\\\"}. " + "분석할 글: \"" + userText + "\"";
         Content content = new Content.Builder().addText(prompt).build();
@@ -95,8 +93,7 @@ public class GeminiAI {
         });
     }
 
-    // --- 재시도 및 JSON 파싱을 위한 내부 헬퍼 메소드들 ---
-
+    // api 호출 재시도 및 JSON 파싱을 위한 내부 헬퍼 메소드들
     private void executeWithRetry(Content content, Executor executor, int attempt, FutureCallback<GenerateContentResponse> finalCallback) {
         ListenableFuture<GenerateContentResponse> response = generativeModel.generateContent(content);
         Futures.addCallback(response, new FutureCallback<GenerateContentResponse>() {
