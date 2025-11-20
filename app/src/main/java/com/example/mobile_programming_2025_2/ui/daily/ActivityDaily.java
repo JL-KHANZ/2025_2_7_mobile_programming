@@ -68,9 +68,13 @@ public class ActivityDaily extends AppCompatActivity {
                         @Override
                         public void onResponse(Map<String, Object> feedback) {
 
-                            Map<String, Object> combinedResult = new HashMap<>();
+                            HashMap<String, Object> combinedResult = new HashMap<>();
                             combinedResult.put("emotion_data", (Serializable) result);
                             combinedResult.put("feedback_data", (Serializable) feedback);
+
+                            System.out.println(combinedResult);
+                            System.out.println(result);
+                            System.out.println(feedback);
 
                             mainHandler.post(() -> {
 
