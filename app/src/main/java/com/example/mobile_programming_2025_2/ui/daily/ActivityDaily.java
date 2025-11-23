@@ -19,10 +19,12 @@ import com.example.mobile_programming_2025_2.R;
 import com.example.mobile_programming_2025_2.SearchChatActivity;
 import com.example.mobile_programming_2025_2.databinding.ActivityDaily1SliderBinding;
 import com.example.mobile_programming_2025_2.network.GeminiAI.EmotionAnalysisCallback;
+import com.example.mobile_programming_2025_2.network.GeminiAI.FeedbackCallback;
 import com.example.mobile_programming_2025_2.network.GeminiAI;
 import com.example.mobile_programming_2025_2.ui.CircularSliderView;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -43,7 +45,6 @@ public class ActivityDaily extends AppCompatActivity {
     private void setupJournalButton() {
         // Find views ONCE and make them final to use in the listener
         final Button btnJournal = findViewById(R.id.daily_journal_btn);
-        final EditText titleText = findViewById(R.id.daily_input_title);
         final EditText contentText = findViewById(R.id.daily_input_content);
 
         final Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -51,45 +52,58 @@ public class ActivityDaily extends AppCompatActivity {
         final GeminiAI geminiAI = new GeminiAI();
 
         btnJournal.setOnClickListener(v -> {
-            // 1. Get the user's input from the EditTexts.
             String content = contentText.getText().toString();
 
             if (content.trim().isEmpty()) {
                 Toast.makeText(this, "Please write something first.", Toast.LENGTH_SHORT).show();
-                return; // Stop if input is empty
+                return;
             }
 
             Toast.makeText(this, "Analyzing...", Toast.LENGTH_SHORT).show();
 
-            // 2. Define the callback for when the AI is finished.
-            EmotionAnalysisCallback callback = new EmotionAnalysisCallback() {
+            EmotionAnalysisCallback emotionCallback = new EmotionAnalysisCallback() {
                 @Override
-                public void onResponse(Map<String, Integer> result) {
-                    mainHandler.post(() -> {
-                        // 3. START THE NEW ACTIVITY to show the results.
-                        Intent intent = new Intent(ActivityDaily.this, ActivityDailyResult.class);
+                public void onResponse(Map<String, Object> result) {
+                    FeedbackCallback feedbackCallback = new FeedbackCallback() {
+                        @Override
+                        public void onResponse(Map<String, Object> feedback) {
 
-                        // 4. Pass the data to the new activity.
-                        // Note: Your Map and its keys/values must be Serializable.
-                        intent.putExtra("ANALYSIS_RESULT", (Serializable) result);
+                            HashMap<String, Object> combinedResult = new HashMap<>();
+                            combinedResult.put("emotion_data", (Serializable) result);
+                            combinedResult.put("feedback_data", (Serializable) feedback);
 
-                        startActivity(intent);
-                    });
+                            System.out.println(combinedResult);
+                            System.out.println(result);
+                            System.out.println(feedback);
+
+                            mainHandler.post(() -> {
+
+                                Intent intent = new Intent(ActivityDaily.this, ActivityDailyResult.class);
+                                intent.putExtra("ANALYSIS_RESULT", (Serializable) combinedResult);
+
+                                startActivity(intent);
+                            });
+                        }
+                        @Override
+                        public void onError(Throwable throwable) {
+                            mainHandler.post(() -> {
+                                Toast.makeText(ActivityDaily.this, "An error occurred during feedback analysis.", Toast.LENGTH_SHORT).show();
+                            });
+
+                        }
+                    };
+                    geminiAI.generateFeedback(content, backgroundExecutor, feedbackCallback);
                 }
-
                 @Override
                 public void onError(Throwable throwable) {
                     mainHandler.post(() -> {
-                        Toast.makeText(ActivityDaily.this, "An error occurred during analysis.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ActivityDaily.this, "An error occurred during emotion analysis.", Toast.LENGTH_SHORT).show();
                     });
                 }
             };
 
-            // 5. Start the background task.
-            geminiAI.analyzeEmotion(content, backgroundExecutor, callback);
+            geminiAI.analyzeEmotion(content, backgroundExecutor, emotionCallback);
         });
     }
 
-    // --- DELETE the journalLayoutViews() and resultLayoutViews() methods ---
-    // Their logic is now handled cleanly in onCreate and the new Activity.
 }
