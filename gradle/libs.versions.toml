@@ -12,6 +12,16 @@ navigationFragment = "2.6.0"
 navigationUi = "2.6.0"
 
 [libraries]
+# ... existing libraries
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version = "34.5.0" }
+firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
+firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
+firebase-database = { group = "com.google.firebase", name = "firebase-database" }
+firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
+firebase-functions = { group = "com.google.firebase", name = "firebase-functions" }
+firebase-storage = { group = "com.google.firebase", name = "firebase-storage" }
+
+
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

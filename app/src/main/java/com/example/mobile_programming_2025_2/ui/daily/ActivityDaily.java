@@ -71,10 +71,7 @@ public class ActivityDaily extends AppCompatActivity {
                             HashMap<String, Object> combinedResult = new HashMap<>();
                             combinedResult.put("emotion_data", (Serializable) result);
                             combinedResult.put("feedback_data", (Serializable) feedback);
-
-                            System.out.println(combinedResult);
-                            System.out.println(result);
-                            System.out.println(feedback);
+                            combinedResult.put("content_data", (Serializable) content);
 
                             mainHandler.post(() -> {
 
