@@ -12,11 +12,6 @@ public class ChatViewModelFactory implements ViewModelProvider.Factory {
         this.repository = repository;
     }
 
-    /**
-     * This method is called by the ViewModelProvider to create the ViewModel instance.
-     * @param modelClass The class of the ViewModel requested (should be ChatViewModel.class).
-     * @return A new instance of the ChatViewModel.
-     */
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {

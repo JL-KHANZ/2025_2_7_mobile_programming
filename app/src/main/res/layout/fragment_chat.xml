@@ -14,7 +14,9 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/input_container"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        android:visibility="gone"
+        />
 
     <LinearLayout
         android:id="@+id/input_container"
@@ -35,6 +37,32 @@
             android:id="@+id/button_send"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/chat_no_chat_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="아직 대화 상대가 없습니다."
+            android:textSize="20sp"
+            android:textColor="#555555"
+            android:padding="30sp"
+            />
+
+        <Button
+            android:id="@+id/chat_find_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="대화 상대 찾기"
+            android:padding="13sp"
+            />
 
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
