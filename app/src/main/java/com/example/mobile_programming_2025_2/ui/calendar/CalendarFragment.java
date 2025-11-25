@@ -125,12 +125,13 @@ public class CalendarFragment extends Fragment {
                     c.get(Calendar.YEAR),
                     c.get(Calendar.MONTH),
                     c.get(Calendar.DAY_OF_MONTH),
-                    false
+                    false,
+                    null
             ));
         }
 
         for(int d = 1; d <= daysInMonth; d++) {
-            list.add(new DayCell(year, month, d, true));
+            list.add(new DayCell(year, month, d, true, null));
         }
 
         int totalCells = 42;
@@ -145,7 +146,8 @@ public class CalendarFragment extends Fragment {
                     c.get(Calendar.YEAR),
                     c.get(Calendar.MONTH),
                     c.get(Calendar.DAY_OF_MONTH),
-                    false
+                    false,
+                    null
             ));
         }
         return list;
@@ -156,12 +158,14 @@ public class CalendarFragment extends Fragment {
         int month;
         int day;
         boolean isCurrentMonth;
+        String emotion;
 
-        DayCell(int year, int month, int day, boolean isCurrentMonth) {
+        DayCell(int year, int month, int day, boolean isCurrentMonth, String emotion) {
             this.year = year;
             this.month = month;
             this.day = day;
             this.isCurrentMonth = isCurrentMonth;
+            this.emotion = emotion;
         }
     }
 
@@ -230,13 +234,8 @@ public class CalendarFragment extends Fragment {
                         listener.onDayClick(cell);
                     }
                 });
-
             }
         }
-
-
-
-
     }
 
     private void showDayDialog(DayCell cell) {
@@ -249,7 +248,6 @@ public class CalendarFragment extends Fragment {
         new AlertDialog.Builder(requireContext())
                 .setTitle(dateStr).setMessage("감정 분석 내용").setPositiveButton("닫기", null).show();
     }
-
 
     @Override
     public void onDestroyView() {

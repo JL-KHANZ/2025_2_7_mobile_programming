@@ -1,5 +1,6 @@
 # Android Studio specific files
 .idea/
+.gradle/
 # Built application files
 /build
 # Local configuration file
