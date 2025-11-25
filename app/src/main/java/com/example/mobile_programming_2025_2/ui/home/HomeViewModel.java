@@ -29,10 +29,11 @@ public class HomeViewModel extends ViewModel {
         todayEntryData.setValue(null);
 
         repository.getTodayEntry().addOnSuccessListener(dailyEntry -> {
-            System.out.println("dailyEntry: " + dailyEntry.date);
-            todayEntryData.setValue(dailyEntry);
+            if (dailyEntry != null) {
+                todayEntryData.setValue(dailyEntry);
+            }
         }).addOnFailureListener(e -> {
-            // Handle failure
+            System.out.println("error getting today entry");
         });
     }
 

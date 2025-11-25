@@ -86,9 +86,11 @@
             android:src="@android:drawable/arrow_down_float"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Toggle Details"
+            android:layout_marginTop="15sp"
+            android:padding="5sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/widget_topEmotion"
-            app:layout_constraintBottom_toBottomOf="@id/widget_topEmotion" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/widget_feedback_2" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -106,7 +108,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Details Paragraph:"
+            android:text="일기 내용:"
             android:textStyle="bold"
             android:textSize="14sp"
             android:paddingBottom="4dp"/>

@@ -81,4 +81,23 @@ public class LocalRepository {
         );
         return tcs.getTask();
     }
+    public Task<DailyEntry> getEntries(String startdate, String enddate) {
+        System.out.println("getTodayEntry called");
+        final TaskCompletionSource<DailyEntry> tcs = new TaskCompletionSource<>();
+
+        String date = getTodayDateString();
+        dailyEntryService.getByPeriod(startdate, enddate,
+                dailyEntry -> {
+                    DailyEntry todayEntry = null;
+                    if (dailyEntry != null) {
+                        todayEntry = dailyEntry.get(date);
+                    }
+                    tcs.setResult(todayEntry);
+                },
+                e -> {
+                    tcs.setException(e);
+                }
+        );
+        return tcs.getTask();
+    }
 }

@@ -53,11 +53,12 @@ public class WidgetDailyEntry extends LinearLayout {
         toggleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (detailsLayout.getVisibility() == View.GONE) {
+                if (detailsLayout.getVisibility() == View.INVISIBLE) {
+                    System.out.println("button clicked so now showing details");
                     detailsLayout.setVisibility(View.VISIBLE);
                      // toggleButton.setImageResource(R.drawable.arrow_up);
                 } else {
-                    detailsLayout.setVisibility(View.GONE);
+                    detailsLayout.setVisibility(View.INVISIBLE);
                     // Optional: toggleButton.setImageResource(R.drawable.arrow_down);
                 }
             }
@@ -69,6 +70,8 @@ public class WidgetDailyEntry extends LinearLayout {
         if (entry != null) {
             findViewById(R.id.widget_constraint_layout).setVisibility(View.VISIBLE);
             findViewById(R.id.widget_placeholder).setVisibility(View.GONE);
+            findViewById(R.id.details_layout).setVisibility(View.INVISIBLE);
+
 
             String entry_date = entry.date;
             String entry_topEmotion = entry.topEmotion;
@@ -88,7 +91,7 @@ public class WidgetDailyEntry extends LinearLayout {
         } else {
             findViewById(R.id.widget_constraint_layout).setVisibility(View.GONE);
             findViewById(R.id.widget_placeholder).setVisibility(View.VISIBLE);
-            findViewById(R.id.details_layout).setVisibility(View.GONE);
+            findViewById(R.id.details_layout).setVisibility(View.INVISIBLE);
         }
     }
 }
