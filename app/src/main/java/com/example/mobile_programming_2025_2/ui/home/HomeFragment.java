@@ -5,17 +5,12 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.mobile_programming_2025_2.LocalRepository;
 import com.example.mobile_programming_2025_2.MainViewModel;
-import com.example.mobile_programming_2025_2.MainViewModelFactory;
-import com.example.mobile_programming_2025_2.R;
-import com.example.mobile_programming_2025_2.Service.DailyEntryService;
 import com.example.mobile_programming_2025_2.databinding.FragmentHomeBinding;
 import com.example.mobile_programming_2025_2.ui.daily.ActivityDaily;
 import com.example.mobile_programming_2025_2.ui.widgets.WidgetDailyEntry;
@@ -41,7 +36,6 @@ public class HomeFragment extends Fragment {
         WidgetDailyEntry widgetDailyEntry = binding.dailyEntryWidgetHome;
 
         mainViewModel.getTodayEntryData().observe(getViewLifecycleOwner(), dailyEntry -> {
-            System.out.println("got dailyEntry data: " + dailyEntry);
             if (dailyEntry != null && dailyEntry.feedback != null && dailyEntry.emotions != null) {
                 widgetDailyEntry.setDailyEntry(dailyEntry);
                 binding.dailyButton.setVisibility(View.GONE);

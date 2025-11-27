@@ -81,6 +81,7 @@ public class ChatRepository {
                     attachMessagesListener(roomId);
                 },
                 err -> {
+                    currentRoomId.setValue(null);
                     Log.e("ChatRepository", "Error getting active chat room: " + err.toString());
                 });
         return currentRoomId;

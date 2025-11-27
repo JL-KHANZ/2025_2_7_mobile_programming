@@ -5,7 +5,7 @@
 
     <item
         android:id="@+id/navigation_calendar"
-        android:icon="@drawable/chart_menu"
+        android:icon="@drawable/calendar_menu"
         android:title="@string/title_calendar"
         app:showAsAction="always" />
 
@@ -22,7 +22,7 @@
         app:showAsAction="always"/>
     <item
         android:id="@+id/navigation_user"
-        android:icon="@drawable/chat_menu"
+        android:icon="@drawable/user_menu"
         android:title="@string/title_user"
         app:showAsAction="always"/>
 

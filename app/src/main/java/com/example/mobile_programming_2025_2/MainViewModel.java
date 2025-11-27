@@ -27,6 +27,7 @@ public class MainViewModel extends ViewModel {
             if (dailyEntry != null) {
                 todayEntryData.setValue(dailyEntry);
                 mText.setValue("오늘의 감정: " + dailyEntry.topEmotion);
+                System.out.println("got dailyEntry: " + dailyEntry);
             }
         }).addOnFailureListener(e -> {
             System.out.println("error getting today entry");
