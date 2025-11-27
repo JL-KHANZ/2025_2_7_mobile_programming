@@ -53,10 +53,22 @@ public class UserFragment extends Fragment {
     private void loadUserProfile() {
         userService.getMyProfile(
                 profile->{
-                    String uid = profile.uid;
-                    String email = profile.email;
-                    binding.textUserid.setText(uid);
-                    binding.emailInput.setText(email);
+                    if (profile.name != null) {
+                        String name = profile.name;
+                        binding.textUsername.setText(name);
+                    }
+                    if (profile.nickname != null) {
+                        String nickname = profile.nickname;
+                        binding.textUsernickname.setText(nickname);
+                    }
+                    if (profile.uid != null) {
+                        String uid = profile.uid;
+                        binding.textUserid.setText(uid);
+                    }
+                    if (profile.email != null) {
+                        String email = profile.email;
+                        binding.emailInput.setText(email);
+                    }
                     if (profile.photoURL == null)
                         binding.imageUser.setImageResource(R.drawable.default_avatar);
 //                    else

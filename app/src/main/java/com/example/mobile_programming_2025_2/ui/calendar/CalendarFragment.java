@@ -1,5 +1,6 @@
 package com.example.mobile_programming_2025_2.ui.calendar;
 
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,10 +19,15 @@ import com.example.mobile_programming_2025_2.R;
 
 import java.util.Calendar;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
+import com.example.mobile_programming_2025_2.Service.DailyEntryService;
+import com.example.mobile_programming_2025_2.data.DailyEntry;
+import com.example.mobile_programming_2025_2.ui.widgets.WidgetDailyEntry;
 import com.example.mobile_programming_2025_2.databinding.FragmentCalendarBinding;
-import com.example.mobile_programming_2025_2.databinding.FragmentHomeBinding;
 
 public class CalendarFragment extends Fragment {
 
@@ -33,6 +39,10 @@ public class CalendarFragment extends Fragment {
 
     private int currentYear;
     private int currentMonth;
+
+    private DailyEntryService dailyEntryService = new DailyEntryService();
+    private Map<String, DailyEntry> monthDailyMap = new HashMap<>();
+
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -96,8 +106,47 @@ public class CalendarFragment extends Fragment {
         String text = String.format("%04d년 %02d월", year, month + 1);
         textMonth.setText(text);
 
-        List<DayCell> cells = buildMonthCells(year, month);
-        adapter.submit(cells);
+//        List<DayCell> cells = buildMonthCells(year, month);
+//        adapter.submit(cells);
+        loadMonthDailyEntries(year,month);
+    }
+
+    private void loadMonthDailyEntries(int year, int month) {
+        Calendar startCal = Calendar.getInstance();
+        startCal.set(year, month, 1);
+
+        Calendar endCal = (Calendar) startCal.clone();
+        int lastDay = endCal.getActualMaximum(Calendar.DAY_OF_MONTH);
+        endCal.set(year, month, lastDay);
+
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String startDate = sdf.format(startCal.getTime());
+        String endDate = sdf.format(endCal.getTime());
+
+        dailyEntryService.getByPeriod(
+                startDate,
+                endDate,
+                dailyMap -> {
+                    monthDailyMap.clear();
+                    monthDailyMap.putAll(dailyMap);
+                    for (String date : dailyMap.keySet()) {
+                        DailyEntry entry = dailyMap.get(date);
+                        if (entry != null) {
+                            android.util.Log.d(
+                                    "Calendar Emo",
+                                    "date = " + date + ", Emotion = " + entry.topEmotion
+                            );
+                        }
+                    }
+                    List<DayCell> cells = buildMonthCells(year, month);
+                    adapter.submit(cells);
+                },
+                e -> {
+                    monthDailyMap.clear();
+                    List<DayCell> cells = buildMonthCells(year, month);
+                    adapter.submit(cells);
+                }
+        );
     }
 
     private List<DayCell> buildMonthCells(int year, int month) {
@@ -131,7 +180,16 @@ public class CalendarFragment extends Fragment {
         }
 
         for(int d = 1; d <= daysInMonth; d++) {
-            list.add(new DayCell(year, month, d, true, null));
+            String key = String.format(Locale.getDefault(), "%04d-%02d-%02d", year, month + 1, d);
+
+            DailyEntry entry = monthDailyMap.get(key);
+            String emotion = null;
+
+            if (entry != null) {
+                emotion = entry.topEmotion;
+            }
+
+            list.add(new DayCell(year, month, d, true, emotion));
         }
 
         int totalCells = 42;
@@ -192,12 +250,12 @@ public class CalendarFragment extends Fragment {
         public DayViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View v = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.item_day_cell, parent, false);
-            return new DayViewHolder(v);
+            return new DayViewHolder(v, listener);
         }
 
         @Override
         public void onBindViewHolder(@NonNull DayViewHolder holder, int position) {
-            holder.bind(items.get(position), listener);
+            holder.bind(items.get(position));
         }
 
         @Override
@@ -207,16 +265,40 @@ public class CalendarFragment extends Fragment {
 
         public static class DayViewHolder extends RecyclerView.ViewHolder {
             TextView dayText;
+            View emotionDot;
 
-            public DayViewHolder(@NonNull View itemView) {
+            public DayViewHolder(@NonNull View itemView, OnDayClickListener listener) {
                 super(itemView);
                 dayText = itemView.findViewById(R.id.text_day);
+                emotionDot = itemView.findViewById(R.id.emotion_dot);
+
+                itemView.setOnClickListener(v -> {
+                    if (listener != null) {
+                        listener.onDayClick((DayCell) itemView.getTag());
+                    }
+                });
             }
 
-            public void bind(DayCell cell, OnDayClickListener listener) {
+            public void bind(DayCell cell) {
+                itemView.setTag(cell);
                 dayText.setText(String.valueOf(cell.day));
 
-                itemView.setAlpha(cell.isCurrentMonth ? 1f : 0.4f);
+                if (cell.isCurrentMonth) {
+                    itemView.setAlpha(1.0f);
+                } else {
+                    itemView.setAlpha(0.4f);
+                }
+
+                emotionDot.setVisibility(View.INVISIBLE);
+
+                if (cell.isCurrentMonth && cell.emotion != null) {
+                    emotionDot.setVisibility(View.VISIBLE);
+                    int color = emotionToColor(cell.emotion);
+                    Drawable bg = emotionDot.getBackground();
+                    if (bg != null) {
+                        bg.setTint(color);
+                    }
+                }
 
                 Calendar today = Calendar.getInstance();
                 boolean isToday = cell.year == today.get(Calendar.YEAR) &&
@@ -228,12 +310,39 @@ public class CalendarFragment extends Fragment {
                 } else {
                     itemView.setBackgroundColor(0x00000000);
                 }
+//
+//                itemView.setOnClickListener(v -> {
+//                    if (listener != null && cell.isCurrentMonth) {
+//                        listener.onDayClick(cell);
+//                    }
+//                });
+            }
 
-                itemView.setOnClickListener(v -> {
-                    if (listener != null && cell.isCurrentMonth) {
-                        listener.onDayClick(cell);
-                    }
-                });
+            private int emotionToColor(String emotion) {
+                switch (emotion) {
+                    case "기쁨":
+                        return 0xfffeee48;
+                    case "신뢰":
+                        return 0xff34c759;
+                    case "공포":
+                        return 0xff7fbd5f;
+                    case "놀람":
+                        return 0xff44a4f7;
+                    case "슬픔":
+                        return 0xff444df7;
+                    case "혐오":
+                        return 0xffbe5af0;
+                    case "분노":
+                        return 0xfffc1b1b;
+                    case "기대":
+                        return 0xfffe7248;
+                    case "절망":
+                        return 0xff44a4f7;
+                    case "우월감":
+                        return 0xfffe7248;
+                    default:
+                        return 0xff9e9e9e;
+                }
             }
         }
     }
@@ -242,11 +351,24 @@ public class CalendarFragment extends Fragment {
         java.util.Calendar c = java.util.Calendar.getInstance();
         c.set(cell.year, cell.month, cell.day);
 
-        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         String dateStr = sdf.format(c.getTime());
 
-        new AlertDialog.Builder(requireContext())
-                .setTitle(dateStr).setMessage("감정 분석 내용").setPositiveButton("닫기", null).show();
+        WidgetDailyEntry widgetView = new WidgetDailyEntry(requireContext(), null);
+
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                .setTitle(dateStr).setView(widgetView).setPositiveButton("닫기", null).create();
+
+        dialog.show();
+
+        DailyEntry entry = monthDailyMap.get(dateStr);
+
+        if (entry != null) {
+            widgetView.setDailyEntry(entry);
+        }
+        else {
+            widgetView.setDailyEntry(null);
+        }
     }
 
     @Override
