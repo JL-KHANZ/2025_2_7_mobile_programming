@@ -6,6 +6,15 @@
     android:layout_height="match_parent"
     android:paddingTop="0dp">
 
+
+    <com.example.mobile_programming_2025_2.ui.BubblesBackgroundView
+        android:id="@+id/background_bubbles"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="0dp"

@@ -49,6 +49,7 @@
     <Button
         android:id="@+id/btnSignUp"
         android:text="회원가입"
+        android:textColor="?attr/colorOnPrimary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"

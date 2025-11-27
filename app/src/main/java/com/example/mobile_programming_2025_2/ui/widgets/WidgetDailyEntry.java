@@ -72,7 +72,6 @@ public class WidgetDailyEntry extends LinearLayout {
             findViewById(R.id.widget_placeholder).setVisibility(View.GONE);
             findViewById(R.id.details_layout).setVisibility(View.INVISIBLE);
 
-
             String entry_date = entry.date;
             String entry_topEmotion = entry.topEmotion;
             String entry_content = entry.content;
