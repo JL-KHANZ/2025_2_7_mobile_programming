@@ -41,9 +41,7 @@ public class ActivityDaily extends AppCompatActivity {
         setupJournalButton();
     }
 
-    // --- Create a dedicated method to set up the button ---
     private void setupJournalButton() {
-        // Find views ONCE and make them final to use in the listener
         final Button btnJournal = findViewById(R.id.daily_journal_btn);
         final EditText contentText = findViewById(R.id.daily_input_content);
 

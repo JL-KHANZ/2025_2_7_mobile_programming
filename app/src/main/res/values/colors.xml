@@ -7,4 +7,81 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    
+    <color name="default_color">#9d8cff</color>
+
+    <color name="joy_color">#ffdd7a</color>
+    <color name="trust_color">#acd36a</color>
+    <color name="fear_color">#2fb774</color>
+    <color name="surprise_color">#2cafd9</color>
+    <color name="sadness_color">#74a8db</color>
+    <color name="disgust_color">#a491c5</color>
+    <color name="anger_color">#f2726d</color>
+    <color name="anticipation_color">#f2726d</color>
+
+<!--    기쁨 - joy-->
+<!--    신뢰 - trust-->
+<!--    공포 - fear-->
+<!--    놀람 - surprise-->
+<!--    슬픔 - sadness-->
+<!--    혐오 - disgust-->
+<!--    분노 - anger-->
+<!--    기대 - anticipation-->
+
+
+    <color name="ecstasy_color">#ffcb08</color>
+    <color name="admiration_color">#8bc750</color>
+    <color name="terror_color">#7ac799</color>
+    <color name="amazement_color">#009ace</color>
+    <color name="grief_color">#2884c6</color>
+    <color name="loathing_color">#8a73b3</color>
+    <color name="rage_color">#f05a61</color>
+    <color name="vigilance_color">#f7923d</color>
+
+<!--    활홀 - ecstasy-->
+<!--    존경 - admiration-->
+<!--    극심한공포 - terror-->
+<!--    깜짝놀람 - amazement-->
+<!--    비탄 - grief-->
+<!--    증오 - loathing-->
+<!--    격노 - rage-->
+<!--    경계 - vigilance-->
+
+    <color name="serenity_color">#fff0a1</color>
+    <color name="acceptance_color">#cae08c</color>
+    <color name="apprehension_color">#7ac799</color>
+    <color name="distraction_color">#8ac9e7</color>
+    <color name="pensiveness_color">#a1c1e6</color>
+    <color name="boredom_color">#baabd3</color>
+    <color name="annoyance_color">#f58e81</color>
+    <color name="interest_color">#fdc687</color>
+
+<!--    평안 - serenity-->
+<!--    승인 - acceptance-->
+<!--    불안 - apprehension-->
+<!--    혼란 - distraction-->
+<!--    수심 - pensiveness-->
+<!--    지루함 - boredom-->
+<!--    짜증 - annoyance-->
+<!--    관심 - interest-->
+
+    <color name="love_color">#D6D872</color>
+    <color name="submission_color">#6EC56F</color>
+    <color name="awe_color">#2EB3A7</color>
+    <color name="disapproval_color">#50ACDA</color>
+    <color name="remorse_color">#8C9DD0</color>
+    <color name="contempt_color">#CB8299</color>
+    <color name="aggressiveness_color">#F69069</color>
+    <color name="optimism_color">#FDC670</color>
+
+<!--    사랑 - love-->
+<!--    순종 - submission-->
+<!--    경외 - awe-->
+<!--    반감 - disapproval-->
+<!--    자책 - remorse-->
+<!--    경멸 - contempt-->
+<!--    공격성 - aggressiveness-->
+<!--    낙관 - optimism-->
+
+
 </resources>
