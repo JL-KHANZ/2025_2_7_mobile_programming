@@ -29,41 +29,41 @@
 <!--    기대 - anticipation-->
 
 
-    <color name="ecstasy_color">#ffcb08</color>
-    <color name="admiration_color">#8bc750</color>
-    <color name="terror_color">#7ac799</color>
-    <color name="amazement_color">#009ace</color>
-    <color name="grief_color">#2884c6</color>
-    <color name="loathing_color">#8a73b3</color>
-    <color name="rage_color">#f05a61</color>
-    <color name="vigilance_color">#f7923d</color>
+    <color name="hope_color">#ffcb08</color>
+    <color name="guilt_color">#8bc750</color>
+    <color name="curiosity_color">#7ac799</color>
+    <color name="despair_color">#009ace</color>
+    <color name="unbelief_color">#2884c6</color>
+    <color name="envy_color">#8a73b3</color>
+    <color name="cynicism_color">#f05a61</color>
+    <color name="pride_color">#f7923d</color>
 
-<!--    활홀 - ecstasy-->
-<!--    존경 - admiration-->
-<!--    극심한공포 - terror-->
-<!--    깜짝놀람 - amazement-->
-<!--    비탄 - grief-->
-<!--    증오 - loathing-->
-<!--    격노 - rage-->
-<!--    경계 - vigilance-->
+<!--    희망 - hope-->
+<!--    죄책감 - guilt-->
+<!--    호기심 - curiosity-->
+<!--    절망 - despair-->
+<!--    불신 - unbelief-->
+<!--    선망 - envy-->
+<!--    냉소 - cynicism-->
+<!--    자부심 - pride-->
 
-    <color name="serenity_color">#fff0a1</color>
-    <color name="acceptance_color">#cae08c</color>
-    <color name="apprehension_color">#7ac799</color>
-    <color name="distraction_color">#8ac9e7</color>
-    <color name="pensiveness_color">#a1c1e6</color>
-    <color name="boredom_color">#baabd3</color>
-    <color name="annoyance_color">#f58e81</color>
-    <color name="interest_color">#fdc687</color>
+    <color name="anxiety_color">#fff0a1</color>
+    <color name="delight_color">#cae08c</color>
+    <color name="sentimentality_color">#7ac799</color>
+    <color name="shame_color">#8ac9e7</color>
+    <color name="outrage_color">#a1c1e6</color>
+    <color name="pessimism_color">#baabd3</color>
+    <color name="morbidness_color">#f58e81</color>
+    <color name="dominance_color">#fdc687</color>
 
-<!--    평안 - serenity-->
-<!--    승인 - acceptance-->
-<!--    불안 - apprehension-->
-<!--    혼란 - distraction-->
-<!--    수심 - pensiveness-->
-<!--    지루함 - boredom-->
-<!--    짜증 - annoyance-->
-<!--    관심 - interest-->
+<!--    염려 - anxiety-->
+<!--    큰기쁨 - delight-->
+<!--    감상적임 - sentimentality-->
+<!--    수치심 - shame-->
+<!--    격분 - outrage-->
+<!--    비관 - pessimism-->
+<!--    병리적 감정 - morbidness-->
+<!--    우월감 - dominance-->
 
     <color name="love_color">#D6D872</color>
     <color name="submission_color">#6EC56F</color>

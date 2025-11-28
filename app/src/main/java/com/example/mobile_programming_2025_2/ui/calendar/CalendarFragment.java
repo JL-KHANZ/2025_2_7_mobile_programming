@@ -28,6 +28,7 @@ import com.example.mobile_programming_2025_2.Service.DailyEntryService;
 import com.example.mobile_programming_2025_2.data.DailyEntry;
 import com.example.mobile_programming_2025_2.ui.widgets.WidgetDailyEntry;
 import com.example.mobile_programming_2025_2.databinding.FragmentCalendarBinding;
+import com.example.mobile_programming_2025_2.ui.ColorMapping;
 
 public class CalendarFragment extends Fragment {
 
@@ -293,7 +294,7 @@ public class CalendarFragment extends Fragment {
 
                 if (cell.isCurrentMonth && cell.emotion != null) {
                     emotionDot.setVisibility(View.VISIBLE);
-                    int color = emotionToColor(cell.emotion);
+                    int color = ColorMapping.getEmotionColor(itemView.getContext(), cell.emotion);
                     Drawable bg = emotionDot.getBackground();
                     if (bg != null) {
                         bg.setTint(color);
@@ -318,32 +319,6 @@ public class CalendarFragment extends Fragment {
 //                });
             }
 
-            private int emotionToColor(String emotion) {
-                switch (emotion) {
-                    case "기쁨":
-                        return 0xfffeee48;
-                    case "신뢰":
-                        return 0xff34c759;
-                    case "공포":
-                        return 0xff7fbd5f;
-                    case "놀람":
-                        return 0xff44a4f7;
-                    case "슬픔":
-                        return 0xff444df7;
-                    case "혐오":
-                        return 0xffbe5af0;
-                    case "분노":
-                        return 0xfffc1b1b;
-                    case "기대":
-                        return 0xfffe7248;
-                    case "절망":
-                        return 0xff44a4f7;
-                    case "우월감":
-                        return 0xfffe7248;
-                    default:
-                        return 0xff9e9e9e;
-                }
-            }
         }
     }
 

@@ -48,70 +48,70 @@
     </style>
 
 
-    <style name="Theme.Mobile_programming_2025_2.Ecstasy" parent="Theme.Mobile_programming_2025_2">
-        <item name="colorPrimary">@color/ecstasy_color</item>
+    <style name="Theme.Mobile_programming_2025_2.Hope" parent="Theme.Mobile_programming_2025_2">
+        <item name="colorPrimary">@color/hope_color</item>
         <item name="colorOnPrimary">@color/white</item>
     </style>
-    <style name="Theme.Mobile_programming_2025_2.Admiration" parent="Theme.Mobile_programming_2025_2">
-        <item name="colorPrimary">@color/admiration_color</item>
+    <style name="Theme.Mobile_programming_2025_2.Guilt" parent="Theme.Mobile_programming_2025_2">
+        <item name="colorPrimary">@color/guilt_color</item>
         <item name="colorOnPrimary">@color/white</item>
     </style>
-    <style name="Theme.Mobile_programming_2025_2.Terror" parent="Theme.Mobile_programming_2025_2">
-        <item name="colorPrimary">@color/terror_color</item>
+    <style name="Theme.Mobile_programming_2025_2.Curiosity" parent="Theme.Mobile_programming_2025_2">
+        <item name="colorPrimary">@color/curiosity_color</item>
         <item name="colorOnPrimary">@color/white</item>
     </style>
-    <style name="Theme.Mobile_programming_2025_2.Amazement" parent="Theme.Mobile_programming_2025_2">
-        <item name="colorPrimary">@color/amazement_color</item>
+    <style name="Theme.Mobile_programming_2025_2.Despair" parent="Theme.Mobile_programming_2025_2">
+        <item name="colorPrimary">@color/despair_color</item>
         <item name="colorOnPrimary">@color/white</item>
     </style>
-    <style name="Theme.Mobile_programming_2025_2.Grief" parent="Theme.Mobile_programming_2025_2">
-        <item name="colorPrimary">@color/grief_color</item>
+    <style name="Theme.Mobile_programming_2025_2.Unbelief" parent="Theme.Mobile_programming_2025_2">
+        <item name="colorPrimary">@color/unbelief_color</item>
         <item name="colorOnPrimary">@color/white</item>
     </style>
-    <style name="Theme.Mobile_programming_2025_2.Loathing" parent="Theme.Mobile_programming_2025_2">
-        <item name="colorPrimary">@color/loathing_color</item>
+    <style name="Theme.Mobile_programming_2025_2.Envy" parent="Theme.Mobile_programming_2025_2">
+        <item name="colorPrimary">@color/envy_color</item>
         <item name="colorOnPrimary">@color/white</item>
     </style>
-    <style name="Theme.Mobile_programming_2025_2.Rage" parent="Theme.Mobile_programming_2025_2">
-        <item name="colorPrimary">@color/rage_color</item>
+    <style name="Theme.Mobile_programming_2025_2.Cynicism" parent="Theme.Mobile_programming_2025_2">
+        <item name="colorPrimary">@color/cynicism_color</item>
         <item name="colorOnPrimary">@color/white</item>
     </style>
-    <style name="Theme.Mobile_programming_2025_2.Vigilance" parent="Theme.Mobile_programming_2025_2">
-        <item name="colorPrimary">@color/vigilance_color</item>
+    <style name="Theme.Mobile_programming_2025_2.Pride" parent="Theme.Mobile_programming_2025_2">
+        <item name="colorPrimary">@color/pride_color</item>
         <item name="colorOnPrimary">@color/white</item>
     </style>
 
 
-    <style name="Theme.Mobile_programming_2025_2.Serenity" parent="Theme.Mobile_programming_2025_2">
-        <item name="colorPrimary">@color/serenity_color</item>
+    <style name="Theme.Mobile_programming_2025_2.Anxiety" parent="Theme.Mobile_programming_2025_2">
+        <item name="colorPrimary">@color/anxiety_color</item>
         <item name="colorOnPrimary">@color/white</item>
     </style>
-    <style name="Theme.Mobile_programming_2025_2.Acceptance" parent="Theme.Mobile_programming_2025_2">
-        <item name="colorPrimary">@color/acceptance_color</item>
+    <style name="Theme.Mobile_programming_2025_2.Delight" parent="Theme.Mobile_programming_2025_2">
+        <item name="colorPrimary">@color/delight_color</item>
         <item name="colorOnPrimary">@color/white</item>
     </style>
-    <style name="Theme.Mobile_programming_2025_2.Apprehension" parent="Theme.Mobile_programming_2025_2">
-        <item name="colorPrimary">@color/apprehension_color</item>
+    <style name="Theme.Mobile_programming_2025_2.Sentimentality" parent="Theme.Mobile_programming_2025_2">
+        <item name="colorPrimary">@color/sentimentality_color</item>
         <item name="colorOnPrimary">@color/white</item>
     </style>
-    <style name="Theme.Mobile_programming_2025_2.Distraction" parent="Theme.Mobile_programming_2025_2">
-        <item name="colorPrimary">@color/distraction_color</item>
+    <style name="Theme.Mobile_programming_2025_2.Shame" parent="Theme.Mobile_programming_2025_2">
+        <item name="colorPrimary">@color/shame_color</item>
         <item name="colorOnPrimary">@color/white</item>
     </style>
-    <style name="Theme.Mobile_programming_2025_2.Pensiveness" parent="Theme.Mobile_programming_2025_2">
-        <item name="colorPrimary">@color/pensiveness_color</item>
+    <style name="Theme.Mobile_programming_2025_2.Outrage" parent="Theme.Mobile_programming_2025_2">
+        <item name="colorPrimary">@color/outrage_color</item>
         <item name="colorOnPrimary">@color/white</item>
     </style>
-    <style name="Theme.Mobile_programming_2025_2.Boredom" parent="Theme.Mobile_programming_2025_2">
-        <item name="colorPrimary">@color/boredom_color</item>
+    <style name="Theme.Mobile_programming_2025_2.Pessimism" parent="Theme.Mobile_programming_2025_2">
+        <item name="colorPrimary">@color/pessimism_color</item>
         <item name="colorOnPrimary">@color/white</item>
     </style>
-    <style name="Theme.Mobile_programming_2025_2.Annoyance" parent="Theme.Mobile_programming_2025_2">
-        <item name="colorPrimary">@color/annoyance_color</item>
+    <style name="Theme.Mobile_programming_2025_2.Morbidness" parent="Theme.Mobile_programming_2025_2">
+        <item name="colorPrimary">@color/morbidness_color</item>
         <item name="colorOnPrimary">@color/white</item>
     </style>
-    <style name="Theme.Mobile_programming_2025_2.Interest" parent="Theme.Mobile_programming_2025_2">
-        <item name="colorPrimary">@color/interest_color</item>
+    <style name="Theme.Mobile_programming_2025_2.Dominance" parent="Theme.Mobile_programming_2025_2">
+        <item name="colorPrimary">@color/dominance_color</item>
         <item name="colorOnPrimary">@color/white</item>
     </style>
 
