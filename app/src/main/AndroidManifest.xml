@@ -40,7 +40,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.daily.ActivityDailyResult" />
-        <activity android:name=".SearchChatActivity" />
         <activity android:name=".SignUpActivity" />
     </application>
 

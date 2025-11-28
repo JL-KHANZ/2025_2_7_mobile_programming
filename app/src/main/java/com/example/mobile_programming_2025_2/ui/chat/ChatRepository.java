@@ -8,7 +8,10 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.example.mobile_programming_2025_2.Service.ChatMessageService;
 import com.example.mobile_programming_2025_2.Service.ChatRoomService;
+import com.example.mobile_programming_2025_2.Service.MatchService;
+import com.example.mobile_programming_2025_2.data.CandidateDTO;
 import com.example.mobile_programming_2025_2.data.ChatMessage;
+import com.example.mobile_programming_2025_2.data.CreateRoomResultDTO;
 import com.google.firebase.database.DatabaseError;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,14 +20,18 @@ public class ChatRepository {
 
     private final ChatRoomService roomService;
     private final ChatMessageService messageService;
+    private final MatchService matchService;
     private final MutableLiveData<String> currentRoomId = new MutableLiveData<>();
     private final MutableLiveData<String> otherDisplayName = new MutableLiveData<>();
     private final MutableLiveData<List<ChatMessage>> messagesLiveData = new MutableLiveData<>();
     private ChatMessageService.Subscription chatSubscription;
+    private final MutableLiveData<List<CandidateDTO>> candidateList = new MutableLiveData<>();
+    private final MutableLiveData<CreateRoomResultDTO> createdRoomUser = new MutableLiveData<>();
 
-    public ChatRepository(ChatRoomService roomService, ChatMessageService messageService) {
+    public ChatRepository(ChatRoomService roomService, ChatMessageService messageService, MatchService matchService) {
         this.roomService = roomService;
         this.messageService = messageService;
+        this.matchService = matchService;
     }
 
     private void attachMessagesListener(String roomId) {
@@ -62,10 +69,10 @@ public class ChatRepository {
             messageService.sendMessage(roomId, content,
                     (err, ref) -> {
                         assert err != null;
-                        Log.e("ChatRepository", "Error sending message: " + err.toString());
+                        System.out.println("Error sending message: " + content);
                     });
         } else {
-            Log.e("ChatRepository", "No active chat room");
+            System.out.println("No active chat room");
         }
     }
 
@@ -76,13 +83,13 @@ public class ChatRepository {
                     String otherName = dto.otherDisplayName;
                     currentRoomId.setValue(roomId);
                     otherDisplayName.setValue(otherName);
-                    Log.d("ChatRepository", "getActiveChatRoom: " + roomId + ", " + otherDisplayName);
+                    System.out.println("ActiveChatRoom: " + roomId + ", " + otherDisplayName);
 
                     attachMessagesListener(roomId);
                 },
                 err -> {
                     currentRoomId.setValue(null);
-                    Log.e("ChatRepository", "Error getting active chat room: " + err.toString());
+                    System.out.println("Error getting active chat room: " + err.toString());
                 });
         return currentRoomId;
     }
@@ -93,4 +100,31 @@ public class ChatRepository {
             chatSubscription = null;
         }
     }
+
+    public MutableLiveData<List<CandidateDTO>> requestMatch() {
+        matchService.requestMatchFromTodayDaily(
+                dto -> {
+                    List<CandidateDTO> candidates = dto.candidates;
+                    candidateList.setValue(candidates);
+                }
+                , err -> {
+                    candidateList.setValue(null);
+                    System.out.println("Error requesting match: " + err);
+                });
+        return candidateList;
+    }
+
+    public MutableLiveData<CreateRoomResultDTO> createChatRoom(@NonNull String otherUserUid) {
+        roomService.createChatRoomWith(
+                otherUserUid,
+                dto -> {
+                    createdRoomUser.setValue(dto);
+                },
+                err -> {
+                    createdRoomUser.setValue(null);
+                    System.out.println("Error creating chat room: " + err);
+                });
+        return createdRoomUser;
+    }
+
 }

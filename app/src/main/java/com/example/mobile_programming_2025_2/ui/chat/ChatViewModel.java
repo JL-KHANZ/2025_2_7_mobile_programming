@@ -5,7 +5,11 @@ import android.util.Log;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+
+import com.example.mobile_programming_2025_2.data.CandidateDTO;
 import com.example.mobile_programming_2025_2.data.ChatMessage;
+import com.example.mobile_programming_2025_2.data.CreateRoomResultDTO;
+
 import java.util.List;
 
 public class ChatViewModel extends ViewModel {
@@ -31,6 +35,14 @@ public class ChatViewModel extends ViewModel {
 
     public MutableLiveData<String> getActiveChatRoom() {
         return repository.getActiveChatRoom();
+    }
+
+    public MutableLiveData<List<CandidateDTO>> requestMatch() {
+        return repository.requestMatch();
+    }
+
+    public MutableLiveData<CreateRoomResultDTO> createChatRoom(String otherUserUid) {
+        return repository.createChatRoom(otherUserUid);
     }
 
     @Override

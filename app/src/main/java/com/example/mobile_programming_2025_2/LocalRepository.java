@@ -63,7 +63,6 @@ public class LocalRepository {
 
     // --- Get Daily Entry ---
     public Task<DailyEntry> getTodayEntry() {
-        System.out.println("getTodayEntry called");
         final TaskCompletionSource<DailyEntry> tcs = new TaskCompletionSource<>();
 
         String date = getTodayDateString();
@@ -82,7 +81,6 @@ public class LocalRepository {
         return tcs.getTask();
     }
     public Task<DailyEntry> getEntries(String startdate, String enddate) {
-        System.out.println("getTodayEntry called");
         final TaskCompletionSource<DailyEntry> tcs = new TaskCompletionSource<>();
 
         String date = getTodayDateString();

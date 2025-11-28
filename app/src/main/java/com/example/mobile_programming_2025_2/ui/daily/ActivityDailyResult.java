@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -16,10 +15,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.mobile_programming_2025_2.LocalRepository;
 import com.example.mobile_programming_2025_2.MainActivity;
 import com.example.mobile_programming_2025_2.R;
-import com.example.mobile_programming_2025_2.SearchChatActivity;
+import com.example.mobile_programming_2025_2.ui.chat.ChatSearchFragment;
 import com.example.mobile_programming_2025_2.Service.DailyEntryService;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -84,6 +82,8 @@ public class ActivityDailyResult extends AppCompatActivity {
             }
             else {
                 uiTopResult.setText(String.valueOf(score));
+                // 테마 변경 setTheme(emotionMapping.getValue(score));
+                // score는 "기쁨", Map<String, String> emotionMapping은 기쁨: joy,
             }
 
         }
@@ -138,11 +138,11 @@ public class ActivityDailyResult extends AppCompatActivity {
     }
 
     private void setupActionButtons() {
-        // This is your old resultLayoutViews() method
+        // 대화 버튼 이상한대로 감 확인 필요
         ImageButton btnHome = findViewById(R.id.daily_3_btn_home);
         btnHome.setOnClickListener(v -> startActivity(new Intent(this, MainActivity.class)));
 
         Button btnChat = findViewById(R.id.daily_3_search_chat_btn);
-        btnChat.setOnClickListener(v -> startActivity(new Intent(this, SearchChatActivity.class)));
+        btnChat.setOnClickListener(v -> startActivity(new Intent(this, ChatSearchFragment.class)));
     }
 }
