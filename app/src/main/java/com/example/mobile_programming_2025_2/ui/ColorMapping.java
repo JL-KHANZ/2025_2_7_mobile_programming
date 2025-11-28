@@ -53,10 +53,10 @@ public class ColorMapping {
 
     }
 
-    private ColorMapping(){}
+    public ColorMapping(){}
 
     @ColorInt
-    public static int getEmotionColor(@NonNull Context context, String emotion) {
+    public static Integer getEmotionColor(@NonNull Context context, String emotion) {
         if (emotion == null) {
             return ContextCompat.getColor(context, R.color.default_color);
         }

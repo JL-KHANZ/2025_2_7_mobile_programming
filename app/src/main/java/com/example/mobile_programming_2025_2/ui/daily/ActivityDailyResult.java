@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat;
 import com.example.mobile_programming_2025_2.LocalRepository;
 import com.example.mobile_programming_2025_2.MainActivity;
 import com.example.mobile_programming_2025_2.R;
+import com.example.mobile_programming_2025_2.ui.ColorMapping;
 import com.example.mobile_programming_2025_2.ui.chat.ChatSearchFragment;
 import com.example.mobile_programming_2025_2.Service.DailyEntryService;
 
@@ -30,12 +31,12 @@ public class ActivityDailyResult extends AppCompatActivity {
 
     private Map<String, Integer> emotionColors = new LinkedHashMap<>();
 
+    private ColorMapping colorMapping = new ColorMapping();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_daily_3_result);
-
-        initEmotionColors();
 
         HashMap<String, Object> combinedData = (HashMap<String, Object>) getIntent().getSerializableExtra(ANALYSIS_RESULT);
         Map<String, Object> emotionResult = (Map<String, Object>) combinedData.get("emotion_data");
@@ -46,43 +47,6 @@ public class ActivityDailyResult extends AppCompatActivity {
         displayFeedbackResults(feedbackResult);
         sendToDB(emotionResult, feedbackResult, content);
         setupActionButtons();
-    }
-
-    private void initEmotionColors() {
-        // 기본 8가지 감정 (그래프 바용)
-        emotionColors.put("기쁨", R.color.joy_color);
-        emotionColors.put("신뢰", R.color.trust_color);
-        emotionColors.put("공포", R.color.fear_color);
-        emotionColors.put("놀람", R.color.surprise_color);
-        emotionColors.put("슬픔", R.color.sadness_color);
-        emotionColors.put("혐오", R.color.disgust_color);
-        emotionColors.put("분노", R.color.anger_color);
-        emotionColors.put("기대", R.color.anticipation_color);
-
-        // 복합 감정 (대표 감정 표시용)
-        emotionColors.put("사랑", R.color.love_color);
-        emotionColors.put("낙관", R.color.optimism_color);
-        emotionColors.put("순종", R.color.submission_color);
-        emotionColors.put("경외", R.color.awe_color);
-        emotionColors.put("반감", R.color.disapproval_color);
-        emotionColors.put("자책", R.color.remorse_color);
-        emotionColors.put("경멸", R.color.contempt_color);
-        emotionColors.put("공격성", R.color.aggressiveness_color);
-        emotionColors.put("죄책감", R.color.remorse_color);
-        emotionColors.put("자부심", R.color.optimism_color);
-        emotionColors.put("큰기쁨", R.color.joy_color);
-        emotionColors.put("희망", R.color.optimism_color);
-        emotionColors.put("호기심", R.color.surprise_color);
-        emotionColors.put("절망", R.color.sadness_color);
-        emotionColors.put("수치심", R.color.remorse_color);
-        emotionColors.put("염려", R.color.fear_color);
-        emotionColors.put("불신", R.color.disgust_color);
-        emotionColors.put("격분", R.color.anger_color);
-        emotionColors.put("비관", R.color.sadness_color);
-        emotionColors.put("냉소", R.color.contempt_color);
-        emotionColors.put("선망", R.color.sadness_color);
-        emotionColors.put("우월감", R.color.optimism_color);
-        emotionColors.put("감상적임", R.color.sadness_color);
     }
 
     private void displayEmotionResults(Map<String, Object> result) {
@@ -114,14 +78,8 @@ public class ActivityDailyResult extends AppCompatActivity {
                 scoreText.setText(String.format("%.1f", scoreFloat));
 
                 // 각 감정별 색상 적용
-                Integer colorResId = emotionColors.get(emotion);
-                if (colorResId != null) {
-                    int color = ContextCompat.getColor(this, colorResId);
-                    scoreBar.setBackgroundColor(color);
-                } else {
-                    int defaultColor = ContextCompat.getColor(this, R.color.default_color);
-                    scoreBar.setBackgroundColor(defaultColor);
-                }
+                Integer emotionColor = colorMapping.getEmotionColor(this, emotion);
+                scoreBar.setBackgroundColor(emotionColor);
 
                 // 10점 만점 기준으로 바 길이 조정
                 LinearLayout.LayoutParams filledParams = (LinearLayout.LayoutParams) scoreBar.getLayoutParams();

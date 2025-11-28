@@ -21,13 +21,42 @@
             android:id="@+id/widget_topEmotion"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="SUCCESS"
-            android:textSize="38sp"
+            android:text="기쁨"
+            android:textSize="35sp"
             android:textStyle="bold"
-            android:textColor="#4CAF50"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintBottom_toTopOf="@id/widgets_emotion_relative_layout"
+            />
+
+        <RelativeLayout
+            android:id="@+id/widgets_emotion_relative_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/widget_topEmotion">
+
+            <LinearLayout
+                android:id="@+id/widget_emotion_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="15dp"
+                >
+
+            </LinearLayout>
+            <!--        placeholder-->
+            <LinearLayout
+                android:id="@+id/widget_placeholder_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                >
+
+            </LinearLayout>
+        </RelativeLayout>
 
         <!-- 2. Two Short Sentences (Smaller, Greyed Out) -->
         <TextView
@@ -38,7 +67,7 @@
             android:text="Date: 2024-11-24. Time spent: 45 min."
             android:textSize="14sp"
             android:textColor="@android:color/darker_gray"
-            app:layout_constraintTop_toBottomOf="@id/widget_topEmotion"
+            app:layout_constraintTop_toBottomOf="@id/widgets_emotion_relative_layout"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
@@ -52,6 +81,24 @@
             app:layout_constraintTop_toBottomOf="@id/widget_empathy"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
+
+        <ScrollView
+            android:id="@+id/widget_feedback_scroll_view"
+            android:layout_width="0dp"
+            android:layout_height="350sp"
+            android:paddingHorizontal="15dp"
+            android:background="#F8F8F8"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/widget_mindset">
+            <LinearLayout
+                android:id="@+id/widget_feedback_results_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                >
+            </LinearLayout>
+        </ScrollView>
 
         <!-- 3. Two Short Sentences (Labeled 1 and 2, Not Greyed) -->
         <TextView

@@ -57,7 +57,6 @@ public class ChatSearchFragment extends Fragment implements CandidateItemCallbac
         });
     }
 
-    // LiveData에서 받은 후보자 리스트를 Adapter에 전달하여 화면에 표시합니다.
     public void displayCandidates(List<CandidateDTO> candidates) {
         if (candidateAdapter != null) {
             candidateAdapter.setCandidates(candidates);
