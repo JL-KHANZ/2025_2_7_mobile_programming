@@ -9,7 +9,7 @@
         android:id="@+id/chatsearch_title_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="대화 대상 검색 창"
+        android:text="대화 상대를 정해주세요:"
         android:padding="25sp"
         android:textSize="20sp"
         app:layout_constraintTop_toTopOf="parent"
@@ -18,12 +18,19 @@
 
     <LinearLayout
         android:id="@+id/chatsearch_layout"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:paddingHorizontal="25sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/chatsearch_title_text"
-        app:layout_constraintBottom_toBottomOf="parent"
-        />
+        >
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view_candidates"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

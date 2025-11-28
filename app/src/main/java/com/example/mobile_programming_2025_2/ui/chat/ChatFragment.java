@@ -45,10 +45,10 @@ public class ChatFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         viewModel.getActiveChatRoom().observe(getViewLifecycleOwner(), roomId -> {
+            View bottomNav = requireActivity().findViewById(R.id.nav_view);
+            bottomNav.setVisibility(View.VISIBLE);
 
             if (roomId == null || roomId.isEmpty()) {
-                View bottomNav = requireActivity().findViewById(R.id.nav_view);
-                bottomNav.setVisibility(View.VISIBLE);
 
                 binding.chatNoChatLayout.setVisibility(View.VISIBLE);
                 binding.recyclerViewChat.setVisibility(View.GONE);
@@ -59,13 +59,12 @@ public class ChatFragment extends Fragment {
                         if (dailyEntry != null) {
 
                             bottomNav.setVisibility(View.GONE);
-
                             FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
                             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                             fragmentTransaction.replace(R.id.nav_host_fragment_activity_main, new ChatSearchFragment());
                             fragmentTransaction.addToBackStack("SearchChat");
                             fragmentTransaction.commit();
-
+                            Toast.makeText(this.getContext(), "대화 상대 검색 중...", Toast.LENGTH_SHORT).show();
                             mainViewModel.getTodayEntryData().removeObservers(getViewLifecycleOwner());
                         } else {
                             System.out.println("daily entry null");
@@ -74,6 +73,7 @@ public class ChatFragment extends Fragment {
                     });
                 });
             } else {
+                System.out.println("active chat exists: " + roomId);
                 chatAdapter = new ChatAdapter(requireContext());
                 LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext());
 

@@ -53,9 +53,7 @@ public class ColorMapping {
 
     }
 
-    private ColorMapping(){
-
-    }
+    private ColorMapping(){}
 
     @ColorInt
     public static int getEmotionColor(@NonNull Context context, String emotion) {
