@@ -12,7 +12,8 @@
         android:id="@+id/emotion_label"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="0.3" android:text="Emotion"
+        android:layout_weight="0.3"
+        android:text="Emotion"
         android:textSize="16sp"
         android:textColor="@android:color/black"
         android:layout_marginEnd="8dp"/>
@@ -20,15 +21,20 @@
     <LinearLayout
         android:id="@+id/bar_container"
         android:layout_width="0dp"
-        android:layout_height="20dp" android:layout_weight="0.7" android:orientation="horizontal"
-        android:background="@drawable/bar_background_rounded"
-        >
+        android:layout_height="20dp"
+        android:layout_weight="0.7"
+        android:orientation="horizontal"
+        android:background="@drawable/bar_background_rounded">
+
         <View
             android:id="@+id/emotion_score_bar"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:background="@drawable/bar_fill_rounded"
-            />
+            android:layout_height="match_parent"/>
+
+        <View
+            android:id="@+id/empty_space"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"/>
     </LinearLayout>
 
     <TextView
