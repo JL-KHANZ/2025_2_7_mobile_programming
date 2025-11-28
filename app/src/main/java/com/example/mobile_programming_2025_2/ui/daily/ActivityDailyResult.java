@@ -1,4 +1,3 @@
-// CREATE A NEW FILE: ActivityDailyResult.java
 package com.example.mobile_programming_2025_2.ui.daily;
 
 import android.content.Intent;
@@ -11,6 +10,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.example.mobile_programming_2025_2.LocalRepository;
 import com.example.mobile_programming_2025_2.MainActivity;
@@ -20,6 +20,7 @@ import com.example.mobile_programming_2025_2.Service.DailyEntryService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,10 +28,14 @@ public class ActivityDailyResult extends AppCompatActivity {
 
     public static final String ANALYSIS_RESULT = "ANALYSIS_RESULT";
 
+    private Map<String, Integer> emotionColors = new LinkedHashMap<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_daily_3_result);
+
+        initEmotionColors();
 
         HashMap<String, Object> combinedData = (HashMap<String, Object>) getIntent().getSerializableExtra(ANALYSIS_RESULT);
         Map<String, Object> emotionResult = (Map<String, Object>) combinedData.get("emotion_data");
@@ -39,10 +44,45 @@ public class ActivityDailyResult extends AppCompatActivity {
 
         displayEmotionResults(emotionResult);
         displayFeedbackResults(feedbackResult);
-
         sendToDB(emotionResult, feedbackResult, content);
-
         setupActionButtons();
+    }
+
+    private void initEmotionColors() {
+        // 기본 8가지 감정 (그래프 바용)
+        emotionColors.put("기쁨", R.color.joy_color);
+        emotionColors.put("신뢰", R.color.trust_color);
+        emotionColors.put("공포", R.color.fear_color);
+        emotionColors.put("놀람", R.color.surprise_color);
+        emotionColors.put("슬픔", R.color.sadness_color);
+        emotionColors.put("혐오", R.color.disgust_color);
+        emotionColors.put("분노", R.color.anger_color);
+        emotionColors.put("기대", R.color.anticipation_color);
+
+        // 복합 감정 (대표 감정 표시용)
+        emotionColors.put("사랑", R.color.love_color);
+        emotionColors.put("낙관", R.color.optimism_color);
+        emotionColors.put("순종", R.color.submission_color);
+        emotionColors.put("경외", R.color.awe_color);
+        emotionColors.put("반감", R.color.disapproval_color);
+        emotionColors.put("자책", R.color.remorse_color);
+        emotionColors.put("경멸", R.color.contempt_color);
+        emotionColors.put("공격성", R.color.aggressiveness_color);
+        emotionColors.put("죄책감", R.color.remorse_color);
+        emotionColors.put("자부심", R.color.optimism_color);
+        emotionColors.put("큰기쁨", R.color.joy_color);
+        emotionColors.put("희망", R.color.optimism_color);
+        emotionColors.put("호기심", R.color.surprise_color);
+        emotionColors.put("절망", R.color.sadness_color);
+        emotionColors.put("수치심", R.color.remorse_color);
+        emotionColors.put("염려", R.color.fear_color);
+        emotionColors.put("불신", R.color.disgust_color);
+        emotionColors.put("격분", R.color.anger_color);
+        emotionColors.put("비관", R.color.sadness_color);
+        emotionColors.put("냉소", R.color.contempt_color);
+        emotionColors.put("선망", R.color.sadness_color);
+        emotionColors.put("우월감", R.color.optimism_color);
+        emotionColors.put("감상적임", R.color.sadness_color);
     }
 
     private void displayEmotionResults(Map<String, Object> result) {
@@ -60,32 +100,57 @@ public class ActivityDailyResult extends AppCompatActivity {
             String emotion = entry.getKey();
             Object score = entry.getValue();
 
-            if (score instanceof  Number) {
+            if (score instanceof Number) {
                 Number scoreNumb = (Number) score;
                 float scoreFloat = scoreNumb.floatValue();
                 View barItemView = inflater.inflate(R.layout.daily_result_emotion_bar, uiResults, false);
 
                 TextView emotionLabel = barItemView.findViewById(R.id.emotion_label);
                 View scoreBar = barItemView.findViewById(R.id.emotion_score_bar);
+                View emptySpace = barItemView.findViewById(R.id.empty_space);
                 TextView scoreText = barItemView.findViewById(R.id.emotion_score_text);
 
                 emotionLabel.setText(emotion);
-                scoreBar.getLayoutParams().width = (int) (scoreFloat * 100);
                 scoreText.setText(String.format("%.1f", scoreFloat));
 
-                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) scoreBar.getLayoutParams();
-                params.width = 0;
-                params.weight = scoreFloat;
-                scoreBar.setLayoutParams(params);
+                // 각 감정별 색상 적용
+                Integer colorResId = emotionColors.get(emotion);
+                if (colorResId != null) {
+                    int color = ContextCompat.getColor(this, colorResId);
+                    scoreBar.setBackgroundColor(color);
+                } else {
+                    int defaultColor = ContextCompat.getColor(this, R.color.default_color);
+                    scoreBar.setBackgroundColor(defaultColor);
+                }
+
+                // 10점 만점 기준으로 바 길이 조정
+                LinearLayout.LayoutParams filledParams = (LinearLayout.LayoutParams) scoreBar.getLayoutParams();
+                filledParams.width = 0;
+                filledParams.weight = scoreFloat;
+                scoreBar.setLayoutParams(filledParams);
+
+                // 빈 공간 추가
+                LinearLayout.LayoutParams emptyParams = (LinearLayout.LayoutParams) emptySpace.getLayoutParams();
+                emptyParams.width = 0;
+                emptyParams.weight = 10.0f - scoreFloat;
+                emptySpace.setLayoutParams(emptyParams);
 
                 uiResults.addView(barItemView);
             }
             else {
-                uiTopResult.setText(String.valueOf(score));
-                // 테마 변경 setTheme(emotionMapping.getValue(score));
-                // score는 "기쁨", Map<String, String> emotionMapping은 기쁨: joy,
-            }
+                // 대표 감정 표시 + 색상 적용
+                String topEmotion = String.valueOf(score);
+                uiTopResult.setText(topEmotion);
 
+                Integer colorResId = emotionColors.get(topEmotion);
+                if (colorResId != null) {
+                    int color = ContextCompat.getColor(this, colorResId);
+                    uiTopResult.setTextColor(color);
+                } else {
+                    int defaultColor = ContextCompat.getColor(this, R.color.default_color);
+                    uiTopResult.setTextColor(defaultColor);
+                }
+            }
         }
     }
 
@@ -138,7 +203,6 @@ public class ActivityDailyResult extends AppCompatActivity {
     }
 
     private void setupActionButtons() {
-        // 대화 버튼 이상한대로 감 확인 필요
         ImageButton btnHome = findViewById(R.id.daily_3_btn_home);
         btnHome.setOnClickListener(v -> startActivity(new Intent(this, MainActivity.class)));
 
