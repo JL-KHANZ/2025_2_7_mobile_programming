@@ -1,4 +1,5 @@
-const functions = require("firebase-functions");
+// const functions = require("firebase-functions"); // 이건 v1버전
+const {onCall, HttpsError} = require("firebase-functions/v2/https"); // v2버전으로 통일(헷갈리면 안됨)
 const admin = require("firebase-admin");
 
 if (!admin.apps.length) {
@@ -10,7 +11,7 @@ const db = admin.firestore();
 function getTopEmotions(emotionScores) {
   const entries = Object.entries(emotionScores || {});
   if (entries.length === 0) {
-    throw new functions.https.HttpsError(
+    throw new HttpsError(
         "invalid-argument",
         "emotionScores가 비어 있습니다.",
     );
@@ -52,35 +53,39 @@ function getTopEmotions(emotionScores) {
      ]
    }
  */
-exports.requestMatch = functions.https.onCall(async (data, context) => {
-  if (!context.auth) {
-    throw new functions.https.HttpsError(
-        "unauthenticated",
-        "로그인이 필요합니다.",
-    );
+exports.requestMatch = onCall(async (request) => {
+  console.log("[requestMatch] START", {
+    auth: request.auth,
+    data: request.data,
+  });
+
+  // 인증 확인 (ID 토큰 붙여서 들어왔는지)
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "로그인이 필요합니다.");
   }
 
-  const callerUid = context.auth.uid;
+  const callerUid = request.auth.uid;
+  const data = request.data || {};
+
+  // uid 위변조 방지
   const uid = data.uid || callerUid;
   if (uid !== callerUid) {
-    // 보안상, data.uid를 임의로 바꾸는 것을 막기
-    throw new functions.https.HttpsError(
+    throw new HttpsError(
         "permission-denied",
         "uid가 현재 사용자와 일치하지 않습니다.",
     );
   }
 
+  // 표시용 이름 (email에서 잘라 온 displayName 같은 것)
   const displayName =
     typeof data.displayName === "string" && data.displayName.trim() !== "" ?
-      data.displayName :
+      data.displayName.trim() :
       null;
 
+  // 감정 점수 검증
   const emotionScores = data.emotionScores;
   if (typeof emotionScores !== "object" || emotionScores === null) {
-    throw new functions.https.HttpsError(
-        "invalid-argument",
-        "emotionScores가 필요합니다.",
-    );
+    throw new HttpsError("invalid-argument", "emotionScores가 필요합니다.");
   }
 
   const {topEmotion, topScore, topTwoEmotions} =
@@ -89,12 +94,13 @@ exports.requestMatch = functions.https.onCall(async (data, context) => {
   const now = admin.firestore.FieldValue.serverTimestamp();
   const ticketRef = db.collection("matchTickets").doc(uid);
 
-  // 내 티켓 업서트
+  // 내 티켓 업서트 (uid를 ticketId처럼 쓰는 구조)
   await ticketRef.set(
       {
         uid,
         displayName,
-        emotionScores,
+        emotionScores, // 전체 점수 저장
+        topEmotion,
         topTwoEmotions, // ["기쁨", "신뢰"] 등
         status: "OPEN",
         createdAt: now,
@@ -103,7 +109,7 @@ exports.requestMatch = functions.https.onCall(async (data, context) => {
       {merge: true},
   );
 
-  // OPEN 상태의 다른 티켓들 조회
+  // OPEN 상태의 다른 티켓 조회
   const snap = await db
       .collection("matchTickets")
       .where("status", "==", "OPEN")
@@ -133,14 +139,16 @@ exports.requestMatch = functions.https.onCall(async (data, context) => {
     }
   });
 
-  // 최대 5명까지만
+  // 최대 5명까지 제한
   const limited = candidates.slice(0, 5);
 
+  // 클라이언트로 반환
   return {
-    ticketId: uid,
+    ticketId: uid, // 현재 설계에선 uid == ticketId
     candidates: limited,
   };
 });
+
 
 /**
   createChatRoom
@@ -155,29 +163,22 @@ exports.requestMatch = functions.https.onCall(async (data, context) => {
      otherDisplayName: string
    }
  */
-exports.createChatRoom = functions.https.onCall(async (data, context) => {
-  if (!context.auth) {
-    throw new functions.https.HttpsError(
-        "unauthenticated",
-        "로그인이 필요합니다.",
-    );
+exports.createChatRoom = onCall(async (request) => {
+  // 인증 확인
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "로그인이 필요합니다.");
   }
 
-  const myUid = context.auth.uid;
+  const myUid = request.auth.uid;
+  const data = request.data || {};
   const otherUid = data.otherUid;
 
   if (!otherUid || typeof otherUid !== "string") {
-    throw new functions.https.HttpsError(
-        "invalid-argument",
-        "otherUid가 필요합니다.",
-    );
+    throw new HttpsError("invalid-argument", "otherUid가 필요합니다.");
   }
 
   if (otherUid === myUid) {
-    throw new functions.https.HttpsError(
-        "invalid-argument",
-        "자기 자신과는 방을 만들 수 없습니다.",
-    );
+    throw new HttpsError("invalid-argument", "자기 자신과는 방을 만들 수 없습니다.");
   }
 
   // pairKey 생성 (uid1_uid2 형태, 정렬)
@@ -187,7 +188,7 @@ exports.createChatRoom = functions.https.onCall(async (data, context) => {
   const roomsRef = db.collection("chatRooms");
   const now = admin.firestore.FieldValue.serverTimestamp();
 
-  //  기존 방 있는지 조회 (OPEN 상태)
+  // 기존 OPEN 방 있는지 조회
   const existingSnap = await roomsRef
       .where("pairKey", "==", pairKey)
       .where("status", "==", "OPEN")
@@ -198,7 +199,7 @@ exports.createChatRoom = functions.https.onCall(async (data, context) => {
   let roomId;
 
   if (!existingSnap.empty) {
-    // 이미 OPEN 상태의 방이 있으면 재사용
+    // 이미 OPEN 상태 방이 있으면 재사용
     roomRef = existingSnap.docs[0].ref;
     roomId = roomRef.id;
     await roomRef.update({
@@ -209,7 +210,7 @@ exports.createChatRoom = functions.https.onCall(async (data, context) => {
     roomRef = roomsRef.doc(); // auto ID
     roomId = roomRef.id;
 
-    // 두 사람의 표시 이름 가져오기 (profile/info 기준)
+    // 두 사람의 표시 이름 가져오기 (users/{uid}/profile/info)
     const myProfileRef = db.doc(`users/${myUid}/profile/info`);
     const otherProfileRef = db.doc(`users/${otherUid}/profile/info`);
 
@@ -223,7 +224,10 @@ exports.createChatRoom = functions.https.onCall(async (data, context) => {
     if (mySnap.exists) {
       const d = mySnap.data() || {};
       memberDisplayNames[myUid] =
-        d.nickname || d.name || (d.email && d.email.split("@")[0]) || "사용자";
+        d.nickname ||
+        d.name ||
+        (d.email && d.email.split("@")[0]) ||
+        "사용자";
     } else {
       memberDisplayNames[myUid] = "사용자";
     }
@@ -232,7 +236,10 @@ exports.createChatRoom = functions.https.onCall(async (data, context) => {
     if (otherSnap.exists) {
       const d = otherSnap.data() || {};
       otherDisplayNameDB =
-        d.nickname || d.name || (d.email && d.email.split("@")[0]) || "사용자";
+        d.nickname ||
+        d.name ||
+        (d.email && d.email.split("@")[0]) ||
+        "사용자";
     }
     memberDisplayNames[otherUid] = otherDisplayNameDB;
 
@@ -253,7 +260,7 @@ exports.createChatRoom = functions.https.onCall(async (data, context) => {
   const myProfileRef = db.doc(`users/${myUid}/profile/info`);
   const otherProfileRef = db.doc(`users/${otherUid}/profile/info`);
 
-  //  matchTickets 상태 CLOSED로 변경
+  // matchTickets 상태 CLOSED 로 변경
   const ticketsRef = db.collection("matchTickets");
   const myTicketRef = ticketsRef.doc(myUid);
   const otherTicketRef = ticketsRef.doc(otherUid);
@@ -282,19 +289,17 @@ exports.createChatRoom = functions.https.onCall(async (data, context) => {
 
   await batch.commit();
 
-  // 응답에서 otherDisplayName 계산 (항상 "상대 기준")
+  // 응답에서 otherDisplayName 계산(ui에서 상대방 이름 표시해야해서)
   const roomSnap = await roomRef.get();
   const roomData = roomSnap.data() || {};
   const memberDisplayNames = roomData.memberDisplayNames || {};
-  const otherDisplayName =
-    memberDisplayNames[otherUid] || "익명의 사용자";
+  const otherDisplayName = memberDisplayNames[otherUid] || "익명의 사용자";
 
   return {
     roomId,
     otherDisplayName,
   };
 });
-
 /**
   getActiveChatRoom
 
@@ -309,15 +314,15 @@ exports.createChatRoom = functions.https.onCall(async (data, context) => {
        otherDisplayName: string
      }
  */
-exports.getActiveChatRoom = functions.https.onCall(async (data, context) => {
-  if (!context.auth) {
-    throw new functions.https.HttpsError(
-        "unauthenticated",
-        "로그인이 필요합니다.",
-    );
+exports.getActiveChatRoom = onCall(async (request) => {
+  // 인증 체크
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "로그인이 필요합니다.");
   }
 
-  const uid = context.auth.uid;
+  const uid = request.auth.uid;
+
+  // 내 profile/info 에서 activeRoomId 읽기
   const profileRef = db.doc(`users/${uid}/profile/info`);
   const profileSnap = await profileRef.get();
 
@@ -332,11 +337,12 @@ exports.getActiveChatRoom = functions.https.onCall(async (data, context) => {
     return {hasRoom: false};
   }
 
+  // chatRooms/{activeRoomId} 조회
   const roomRef = db.collection("chatRooms").doc(activeRoomId);
   const roomSnap = await roomRef.get();
 
   if (!roomSnap.exists) {
-    // 방이 사라졌다면 activeRoomId를 정리해도 되지만, 여기선 단순히 없음 처리
+    // 방이 삭제된 경우: 여기서는 그냥 없음 처리
     return {hasRoom: false};
   }
 
@@ -349,7 +355,7 @@ exports.getActiveChatRoom = functions.https.onCall(async (data, context) => {
   const members = room.members || {};
   const memberDisplayNames = room.memberDisplayNames || {};
 
-  // otherUid 찾기
+  // 나 말고 상대 uid 찾기
   const memberUids = Object.keys(members);
   const otherUid = memberUids.find((u) => u !== uid);
 
@@ -360,6 +366,7 @@ exports.getActiveChatRoom = functions.https.onCall(async (data, context) => {
   const otherDisplayName =
     memberDisplayNames[otherUid] || "익명의 사용자";
 
+  // 현재 진행 중인 방 정보 반환
   return {
     hasRoom: true,
     roomId: activeRoomId,
@@ -385,28 +392,23 @@ exports.getActiveChatRoom = functions.https.onCall(async (data, context) => {
      success: true
    }
  */
-exports.closeChatRoom = functions.https.onCall(async (data, context) => {
-  if (!context.auth) {
-    throw new functions.https.HttpsError(
-        "unauthenticated",
-        "로그인이 필요합니다.",
-    );
+exports.closeChatRoom = onCall(async (request) => {
+  // 인증 체크
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "로그인이 필요합니다.");
   }
 
-  const callerUid = context.auth.uid;
-  const roomId = data.roomId;
+  const callerUid = request.auth.uid;
+  const roomId = request.data.roomId;
 
   if (!roomId || typeof roomId !== "string") {
-    throw new functions.https.HttpsError(
-        "invalid-argument",
-        "roomId가 필요합니다.",
-    );
+    throw new HttpsError("invalid-argument", "roomId가 필요합니다.");
   }
 
   const roomRef = db.collection("chatRooms").doc(roomId);
   const roomSnap = await roomRef.get();
 
-  // 방이 아예 없으면: 호출자 activeRoomId만 정리하고 성공 리턴(에러로 터뜨리지 않음)
+  // 방이 아예 없으면: 내 activeRoomId만 정리하고 그냥 성공 리턴
   if (!roomSnap.exists) {
     const myProfileRef = db.doc(`users/${callerUid}/profile/info`);
     await myProfileRef.set(
@@ -424,7 +426,7 @@ exports.closeChatRoom = functions.https.onCall(async (data, context) => {
 
   // 호출자가 멤버가 아니면 권한 없음
   if (!members[callerUid]) {
-    throw new functions.https.HttpsError(
+    throw new HttpsError(
         "permission-denied",
         "이 방의 참여자가 아닙니다.",
     );
@@ -435,7 +437,7 @@ exports.closeChatRoom = functions.https.onCall(async (data, context) => {
 
   const batch = db.batch();
 
-  // 각 멤버 프로필의 activeRoomId = null로 변경
+  // 모든 멤버 프로필에서 activeRoomId 초기화
   memberUids.forEach((uid) => {
     const profileRef = db.doc(`users/${uid}/profile/info`);
     batch.set(
@@ -454,10 +456,9 @@ exports.closeChatRoom = functions.https.onCall(async (data, context) => {
   // Firestore 배치 커밋
   await batch.commit();
 
-  // Realtime DB의 메시지 삭제
+  // Realtime DB 메시지도 삭제
   const rtdb = admin.database();
   await rtdb.ref(`chatMessages/${roomId}`).remove();
 
   return {success: true};
 });
-
