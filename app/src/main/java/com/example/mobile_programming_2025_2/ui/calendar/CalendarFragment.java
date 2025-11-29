@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -107,8 +108,6 @@ public class CalendarFragment extends Fragment {
         String text = String.format("%04d년 %02d월", year, month + 1);
         textMonth.setText(text);
 
-//        List<DayCell> cells = buildMonthCells(year, month);
-//        adapter.submit(cells);
         loadMonthDailyEntries(year,month);
     }
 
@@ -132,12 +131,6 @@ public class CalendarFragment extends Fragment {
                     monthDailyMap.putAll(dailyMap);
                     for (String date : dailyMap.keySet()) {
                         DailyEntry entry = dailyMap.get(date);
-                        if (entry != null) {
-                            android.util.Log.d(
-                                    "Calendar Emo",
-                                    "date = " + date + ", Emotion = " + entry.topEmotion
-                            );
-                        }
                     }
                     List<DayCell> cells = buildMonthCells(year, month);
                     adapter.submit(cells);
@@ -311,12 +304,6 @@ public class CalendarFragment extends Fragment {
                 } else {
                     itemView.setBackgroundColor(0x00000000);
                 }
-//
-//                itemView.setOnClickListener(v -> {
-//                    if (listener != null && cell.isCurrentMonth) {
-//                        listener.onDayClick(cell);
-//                    }
-//                });
             }
 
         }
@@ -329,21 +316,19 @@ public class CalendarFragment extends Fragment {
         java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         String dateStr = sdf.format(c.getTime());
 
-        WidgetDailyEntry widgetView = new WidgetDailyEntry(requireContext(), null);
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+        View dialogView = inflater.inflate(R.layout.dialog_daily_entry, null);
+
+        WidgetDailyEntry widgetView = dialogView.findViewById(R.id.widget_daily_entry);
 
         AlertDialog dialog = new AlertDialog.Builder(requireContext())
-                .setTitle(dateStr).setView(widgetView).setPositiveButton("닫기", null).create();
+                .setTitle(dateStr).setView(dialogView).setPositiveButton("닫기", null).create();
 
         dialog.show();
 
         DailyEntry entry = monthDailyMap.get(dateStr);
 
-        if (entry != null) {
-            widgetView.setDailyEntry(entry);
-        }
-        else {
-            widgetView.setDailyEntry(null);
-        }
+        widgetView.setDailyEntry(entry);
     }
 
     @Override
