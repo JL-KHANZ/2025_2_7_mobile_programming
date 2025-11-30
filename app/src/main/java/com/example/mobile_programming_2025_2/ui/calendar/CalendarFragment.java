@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.view.Gravity; // 추가
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +19,6 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.mobile_programming_2025_2.MainViewModel;
 import com.example.mobile_programming_2025_2.R;
 import com.example.mobile_programming_2025_2.Service.DailyEntryService;
 import com.example.mobile_programming_2025_2.data.DailyEntry;
@@ -55,23 +54,17 @@ public class CalendarFragment extends Fragment {
 
     private int selectedYear, selectedMonth, selectedDay;
 
-    public interface OnDayClickListener {
-        void onDayClick(DayCell cell);
-    }
+    // 🔥 딱 하나만 존재하는 온클릭 리스너
+    public interface OnDayClickListener { void onDayClick(DayCell cell); }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        CalendarViewModel calendarViewModel =
-                new ViewModelProvider(this).get(CalendarViewModel.class);
-
         binding = FragmentCalendarBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
         textMonth = view.findViewById(R.id.text_month);
         btnPrev = view.findViewById(R.id.btn_prev);
         btnNext = view.findViewById(R.id.btn_next);
@@ -81,33 +74,28 @@ public class CalendarFragment extends Fragment {
         Calendar today = Calendar.getInstance();
         currentYear = today.get(Calendar.YEAR);
         currentMonth = today.get(Calendar.MONTH);
-
         selectedYear = currentYear;
         selectedMonth = currentMonth;
         selectedDay = today.get(Calendar.DAY_OF_MONTH);
 
-        todoAdapter = new TodoAdapter(todoList, (item, isChecked) -> {
-            saveTodoState(item.getText(), isChecked);
-        });
+        // 🔹 Todo 리스트
+        todoAdapter = new TodoAdapter(todoList, (item, isChecked) -> saveTodoState(item.getText(), isChecked));
         recyclerTodo.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerTodo.setAdapter(todoAdapter);
 
+        // 🔥 Calendar Adapter 연결
         recyclerCalendar.setLayoutManager(new GridLayoutManager(getActivity(), 7));
-        adapter = new CalendarAdapter(new OnDayClickListener() {
-            @Override
-            public void onDayClick(DayCell cell) {
-                if (cell.isCurrentMonth) {
-                    if (cell.year == selectedYear && cell.month == selectedMonth && cell.day == selectedDay) {
-                        showDayDialog(cell);
-                    } else {
-                        selectedYear = cell.year;
-                        selectedMonth = cell.month;
-                        selectedDay = cell.day;
+        adapter = new CalendarAdapter(cell -> {
+            if (!cell.isCurrentMonth) return;
 
-                        adapter.notifyDataSetChanged();
-                        updateTodoListForSelectedDate(cell);
-                    }
-                }
+            if (cell.year == selectedYear && cell.month == selectedMonth && cell.day == selectedDay) {
+                showDayDialog(cell);
+            } else {
+                selectedYear = cell.year;
+                selectedMonth = cell.month;
+                selectedDay = cell.day;
+                adapter.notifyDataSetChanged();
+                updateTodoListForSelectedDate(cell);
             }
         });
         recyclerCalendar.setAdapter(adapter);
@@ -116,19 +104,19 @@ public class CalendarFragment extends Fragment {
 
         btnPrev.setOnClickListener(v -> {
             if (currentMonth == 0) { currentMonth = 11; currentYear--; }
-            else { currentMonth--; }
+            else currentMonth--;
             renderMonth(currentYear, currentMonth);
         });
+
         btnNext.setOnClickListener(v -> {
             if (currentMonth == 11) { currentMonth = 0; currentYear++; }
-            else { currentMonth++; }
+            else currentMonth++;
             renderMonth(currentYear, currentMonth);
         });
     }
 
     private void renderMonth(int year, int month) {
-        String text = String.format(Locale.getDefault(), "%04d년 %02d월", year, month + 1);
-        textMonth.setText(text);
+        textMonth.setText(String.format(Locale.getDefault(), "%04d년 %02d월", year, month + 1));
         loadMonthDailyEntries(year, month);
     }
 
@@ -139,206 +127,154 @@ public class CalendarFragment extends Fragment {
         endCal.set(year, month, endCal.getActualMaximum(Calendar.DAY_OF_MONTH));
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        String startDate = sdf.format(startCal.getTime());
-        String endDate = sdf.format(endCal.getTime());
 
-        dailyEntryService.getByPeriod(startDate, endDate,
+        dailyEntryService.getByPeriod(
+                sdf.format(startCal.getTime()), sdf.format(endCal.getTime()),
                 dailyMap -> {
-                    monthDailyMap.clear();
-                    monthDailyMap.putAll(dailyMap);
-
-                    List<DayCell> cells = buildMonthCells(year, month);
-                    adapter.submit(cells);
-
-                    String selectedKey = String.format(Locale.getDefault(), "%04d-%02d-%02d", selectedYear, selectedMonth + 1, selectedDay);
-                    updateTodoList(monthDailyMap.get(selectedKey));
+                    monthDailyMap = dailyMap;
+                    adapter.submit(buildMonthCells(year, month));
+                    updateTodoList(monthDailyMap.get(getSelectedKey()));
                 },
-                e -> {
-                    monthDailyMap.clear();
-                    List<DayCell> cells = buildMonthCells(year, month);
-                    adapter.submit(cells);
-                }
+                e -> adapter.submit(buildMonthCells(year, month))
         );
     }
 
+    private String getSelectedKey() {
+        return String.format(Locale.getDefault(), "%04d-%02d-%02d", selectedYear, selectedMonth + 1, selectedDay);
+    }
+
     private void saveTodoState(String todoContent, boolean isChecked) {
-        String dateKey = String.format(Locale.getDefault(), "%04d-%02d-%02d", selectedYear, selectedMonth + 1, selectedDay);
-        String key = dateKey + "_" + todoContent;
         SharedPreferences prefs = requireContext().getSharedPreferences("TodoPrefs", Context.MODE_PRIVATE);
-        prefs.edit().putBoolean(key, isChecked).apply();
+        prefs.edit().putBoolean(getSelectedKey()+"_"+todoContent, isChecked).apply();
     }
 
     private boolean loadTodoState(String dateKey, String todoContent) {
-        String key = dateKey + "_" + todoContent;
         SharedPreferences prefs = requireContext().getSharedPreferences("TodoPrefs", Context.MODE_PRIVATE);
-        return prefs.getBoolean(key, false);
+        return prefs.getBoolean(dateKey+"_"+todoContent, false);
     }
 
     private void updateTodoListForSelectedDate(DayCell cell) {
-        String key = String.format(Locale.getDefault(), "%04d-%02d-%02d", cell.year, cell.month + 1, cell.day);
-        updateTodoList(monthDailyMap.get(key));
+        updateTodoList(monthDailyMap.get(
+                String.format(Locale.getDefault(), "%04d-%02d-%02d", cell.year, cell.month+1, cell.day)
+        ));
     }
 
-    // ⭐️ [수정됨] 체크박스 상태 불러오기 로직 수정!
     private void updateTodoList(DailyEntry entry) {
         todoList.clear();
 
-        // 현재 선택된 날짜의 Key 생성
-        String dateKey = String.format(Locale.getDefault(), "%04d-%02d-%02d", selectedYear, selectedMonth + 1, selectedDay);
-
+        String key = getSelectedKey();
         if (entry != null && entry.feedback != null) {
-            Map<String, String> feedback = entry.feedback;
-            String r1 = feedback.get("생활 루틴 1");
-            String r2 = feedback.get("생활 루틴 2");
+            if (entry.feedback.get("생활 루틴 1") != null)
+                todoList.add(new TodoItem(entry.feedback.get("생활 루틴 1"), loadTodoState(key, entry.feedback.get("생활 루틴 1"))));
 
-            // dateKey를 정확히 전달하여 저장된 상태를 불러옴
-            if (r1 != null && !r1.isEmpty()) todoList.add(new TodoItem(r1, loadTodoState(dateKey, r1)));
-            if (r2 != null && !r2.isEmpty()) todoList.add(new TodoItem(r2, loadTodoState(dateKey, r2)));
+            if (entry.feedback.get("생활 루틴 2") != null)
+                todoList.add(new TodoItem(entry.feedback.get("생활 루틴 2"), loadTodoState(key, entry.feedback.get("생활 루틴 2"))));
         }
         todoAdapter.notifyDataSetChanged();
     }
 
+    // 🔥 팝업 위젯 띄우기
     private void showDayDialog(DayCell cell) {
         Calendar c = Calendar.getInstance();
         c.set(cell.year, cell.month, cell.day);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        String dateStr = sdf.format(c.getTime());
-        SimpleDateFormat sdfDisplay = new SimpleDateFormat("yyyy년 MM월 dd일", Locale.getDefault());
-        String dateDisplay = sdfDisplay.format(c.getTime());
 
-        WidgetDailyEntry widgetView = new WidgetDailyEntry(requireContext(), R.layout.widget_daily_entry_calender);
+        String dateStr = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(c.getTime());
+        String dateDisplay = new SimpleDateFormat("yyyy년 MM월 dd일", Locale.getDefault()).format(c.getTime());
+
+        WidgetDailyEntry widgetView = new WidgetDailyEntry(requireContext(), null);
 
         AlertDialog dialog = new AlertDialog.Builder(requireContext())
                 .setView(widgetView)
                 .create();
-
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-            // ⭐️ 팝업 중앙 정렬
-            dialog.getWindow().setGravity(Gravity.CENTER);
-        }
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        dialog.getWindow().setGravity(Gravity.CENTER);
 
         dialog.show();
-        DailyEntry entry = monthDailyMap.get(dateStr);
-        widgetView.setDailyEntry(entry, dateDisplay);
+        widgetView.setDailyEntry(monthDailyMap.get(dateStr), dateDisplay);
     }
 
     private List<DayCell> buildMonthCells(int year, int month) {
         List<DayCell> list = new ArrayList<>(42);
+
         Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.YEAR, year);
-        cal.set(Calendar.MONTH, month);
-        cal.set(Calendar.DAY_OF_MONTH, 1);
+        cal.set(year, month, 1);
         int firstDayWeek = cal.get(Calendar.DAY_OF_WEEK);
         int daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
-        int prefixCount = (firstDayWeek + 5) % 7;
-        Calendar prevCal = (Calendar) cal.clone();
-        prevCal.add(Calendar.MONTH, -1);
-        int daysInPrevMonth = prevCal.getActualMaximum(Calendar.DAY_OF_MONTH);
+        int prefix = (firstDayWeek + 5) % 7;
 
-        for (int i = prefixCount - 1; i >= 0; i--) {
-            int day = daysInPrevMonth - i;
-            Calendar c = (Calendar) prevCal.clone();
-            c.set(Calendar.DAY_OF_MONTH, day);
-            list.add(new DayCell(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH), false, null));
+        Calendar prev = (Calendar) cal.clone(); prev.add(Calendar.MONTH,-1);
+        int prevDays = prev.getActualMaximum(Calendar.DAY_OF_MONTH);
+
+        for (int i = prefix-1;i>=0;i--)
+            list.add(new DayCell(prev.get(Calendar.YEAR), prev.get(Calendar.MONTH), prevDays-i,false,null));
+
+        for(int d=1; d<=daysInMonth; d++){
+            DailyEntry entry = monthDailyMap.get(String.format("%04d-%02d-%02d",year,month+1,d));
+            list.add(new DayCell(year,month,d,true,entry==null?null:entry.topEmotion));
         }
-        for(int d = 1; d <= daysInMonth; d++) {
-            String key = String.format(Locale.getDefault(), "%04d-%02d-%02d", year, month + 1, d);
-            DailyEntry entry = monthDailyMap.get(key);
-            String emotion = null;
-            if (entry != null) emotion = entry.topEmotion;
-            list.add(new DayCell(year, month, d, true, emotion));
-        }
-        int remain = 42 - list.size();
-        Calendar nextCal = (Calendar) cal.clone();
-        nextCal.add(Calendar.MONTH, 1);
-        for (int d = 1; d <= remain; d++) {
-            Calendar c = (Calendar) nextCal.clone();
-            c.set(Calendar.DAY_OF_MONTH, d);
-            list.add(new DayCell(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH), false, null));
-        }
+
+        Calendar next = (Calendar) cal.clone(); next.add(Calendar.MONTH,1);
+        while(list.size()<42)
+            list.add(new DayCell(next.get(Calendar.YEAR), next.get(Calendar.MONTH), list.size()-daysInMonth-prefix+1,false,null));
+
         return list;
     }
 
-    static class DayCell {
-        int year, month, day;
-        boolean isCurrentMonth;
-        String emotion;
-        DayCell(int y, int m, int d, boolean c, String e) { year=y; month=m; day=d; isCurrentMonth=c; emotion=e; }
+    // 📌 Calendar Cell 데이터 구조
+    static class DayCell{
+        int year,month,day; boolean isCurrentMonth; String emotion;
+        DayCell(int y,int m,int d,boolean c,String e){year=y;month=m;day=d;isCurrentMonth=c;emotion=e;}
     }
 
+    // 📌 Calendar Adapter 확정 버전
     class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.DayViewHolder> {
         private final List<DayCell> items = new ArrayList<>();
         private final OnDayClickListener listener;
 
-        public CalendarAdapter(OnDayClickListener listener) { this.listener = listener; }
-
-        public void submit(List<DayCell> newItems) {
-            items.clear(); items.addAll(newItems); notifyDataSetChanged();
-        }
-
+        CalendarAdapter(OnDayClickListener l){listener=l;}
+        void submit(List<DayCell> list){items.clear();items.addAll(list);notifyDataSetChanged();}
+        @Override public int getItemCount(){return items.size();}
         @NonNull @Override
-        public DayViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_day_cell, parent, false);
-            return new DayViewHolder(v, listener);
+        public DayViewHolder onCreateViewHolder(@NonNull ViewGroup p,int v){
+            return new DayViewHolder(LayoutInflater.from(p.getContext()).inflate(R.layout.item_day_cell,p,false));
         }
+        @Override public void onBindViewHolder(@NonNull DayViewHolder h,int pos){h.bind(items.get(pos));}
 
-        @Override
-        public void onBindViewHolder(@NonNull DayViewHolder holder, int position) {
-            holder.bind(items.get(position));
-        }
+        class DayViewHolder extends RecyclerView.ViewHolder{
+            TextView day; View dot,box;
+            DayViewHolder(View v){ super(v);
+                day=v.findViewById(R.id.cellDayText);
+                dot=v.findViewById(R.id.emotion_dot);
+                box=v.findViewById(R.id.day_cell_container);
 
-        @Override public int getItemCount() { return items.size(); }
-
-        class DayViewHolder extends RecyclerView.ViewHolder {
-            TextView dayText;
-            View emotionDot;
-            View container;
-
-            public DayViewHolder(@NonNull View itemView, OnDayClickListener listener) {
-                super(itemView);
-                dayText = itemView.findViewById(R.id.cellDayText);
-                emotionDot = itemView.findViewById(R.id.emotion_dot);
-                container = itemView.findViewById(R.id.day_cell_container);
-
-                itemView.setOnClickListener(v -> {
-                    if (listener != null) listener.onDayClick((DayCell) itemView.getTag());
+                v.setOnClickListener(view -> {
+                    if(listener!=null) listener.onDayClick((DayCell)view.getTag());
                 });
             }
 
-            public void bind(DayCell cell) {
+            void bind(DayCell cell){
                 itemView.setTag(cell);
-                dayText.setText(String.valueOf(cell.day));
+                day.setText(String.valueOf(cell.day));
 
-                if (cell.isCurrentMonth) itemView.setAlpha(1.0f);
-                else itemView.setAlpha(0.4f);
+                itemView.setAlpha(cell.isCurrentMonth?1f:0.35f);
+                dot.setVisibility(View.GONE);
 
-                emotionDot.setVisibility(View.INVISIBLE);
-                if (cell.isCurrentMonth && cell.emotion != null) {
-                    emotionDot.setVisibility(View.VISIBLE);
-                    int color = ColorMapping.getEmotionColor(itemView.getContext(), cell.emotion);
-                    Drawable bg = emotionDot.getBackground();
-                    if (bg != null) bg.setTint(color);
+                if(cell.isCurrentMonth && cell.emotion!=null){
+                    dot.setVisibility(View.VISIBLE);
+                    Drawable bg=dot.getBackground();
+                    if(bg!=null) bg.setTint(ColorMapping.getEmotionColor(itemView.getContext(),cell.emotion));
                 }
 
-                Calendar today = Calendar.getInstance();
-                boolean isToday = (cell.year == today.get(Calendar.YEAR) && cell.month == today.get(Calendar.MONTH) && cell.day == today.get(Calendar.DAY_OF_MONTH));
-                boolean isSelected = (cell.year == selectedYear && cell.month == selectedMonth && cell.day == selectedDay);
+                Calendar t=Calendar.getInstance();
+                boolean today=cell.year==t.get(Calendar.YEAR)&&cell.month==t.get(Calendar.MONTH)&&cell.day==t.get(Calendar.DAY_OF_MONTH);
+                boolean sel=cell.year==selectedYear&&cell.month==selectedMonth&&cell.day==selectedDay;
 
-                if (isSelected) {
-                    container.setBackgroundResource(R.drawable.bg_date_selected);
-                } else if (isToday) {
-                    container.setBackgroundColor(0x20FF9800);
-                } else {
-                    container.setBackgroundResource(R.drawable.calendar_cell_border);
-                }
+                if(sel) box.setBackgroundResource(R.drawable.bg_date_selected);
+                else if(today) box.setBackgroundColor(0x22FF9800);
+                else box.setBackgroundResource(R.drawable.calendar_cell_border);
             }
         }
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
-    }
+    @Override public void onDestroyView(){super.onDestroyView(); binding=null;}
 }

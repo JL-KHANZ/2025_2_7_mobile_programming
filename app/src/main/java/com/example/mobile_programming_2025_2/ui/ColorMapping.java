@@ -60,10 +60,7 @@ public class ColorMapping {
         if (emotion == null) {
             return ContextCompat.getColor(context, R.color.default_color);
         }
-
-        String key = emotion;
-
-        Integer resId = EMOTION_COLOR_RES.get(key);
+        Integer resId = EMOTION_COLOR_RES.get(emotion);
         if (resId == null) {
             return ContextCompat.getColor(context, R.color.default_color);
         }
