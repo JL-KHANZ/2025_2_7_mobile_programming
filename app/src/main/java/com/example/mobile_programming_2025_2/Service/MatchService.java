@@ -55,14 +55,6 @@ public class MatchService {
                 .format(new Date());
     }
 
-    /** email에서 @ 앞부분만 잘라 표시용 이름 생성 */
-    private String extractNameFromEmail(@Nullable String email) {
-        if (email == null || email.isEmpty()) return "익명의 사용자";
-        int idx = email.indexOf("@");
-        if (idx <= 0) return "익명의 사용자";
-        return email.substring(0, idx);
-    }
-
     /**
      *오늘 일기의 emotions(map) 을 읽어서
      *Cloud Function "requestMatch" 호출
@@ -79,8 +71,6 @@ public class MatchService {
         }
 
         String uid = u.getUid();
-        String email = u.getEmail();
-        String displayName = extractNameFromEmail(email);
         String today = todayYMD();
 
         Log.d(TAG, "requestMatchFromTodayDaily uid=" + uid + ", date=" + today);
@@ -88,7 +78,7 @@ public class MatchService {
         dailyEntryCol(uid).document(today)
                 .get()
                 .addOnSuccessListener(snap -> handleDailyEntryAndCallFunction(
-                        snap, uid, displayName, onSuccess, onFailure
+                        snap, uid, onSuccess, onFailure
                 ))
                 .addOnFailureListener(e -> {
                     if (onFailure != null) onFailure.onFailure(e);
@@ -98,7 +88,6 @@ public class MatchService {
     /** dailyEntry 문서에서 emotions를 꺼내고, requestMatch 함수 호출 */
     private void handleDailyEntryAndCallFunction(DocumentSnapshot snap,
                                                  String uid,
-                                                 String displayName,
                                                  OnSuccessListener<MatchResultDTO> onSuccess,
                                                  @Nullable OnFailureListener onFailure) {
         if (snap == null || !snap.exists()) {
@@ -140,7 +129,6 @@ public class MatchService {
         // Cloud Function payload
         Map<String, Object> payload = new HashMap<>();
         payload.put("uid", uid);
-        payload.put("displayName", displayName);
         payload.put("emotionScores", emotionScores);
 
         functions

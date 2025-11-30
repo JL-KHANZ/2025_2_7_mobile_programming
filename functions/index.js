@@ -82,13 +82,17 @@ exports.requestMatch = onCall(async (request) => {
         "uid가 현재 사용자와 일치하지 않습니다.",
     );
   }
+  //nickname사용(없으면 익명의 사용자)
+  const profileRef = db.doc(`users/${uid}/profile/info`);
+  const profileSnap = await profileRef.get();
 
-  // 표시용 이름 (email에서 잘라 온 displayName 같은 것)
-  const displayName =
-    typeof data.displayName === "string" && data.displayName.trim() !== "" ?
-      data.displayName.trim() :
-      null;
-
+  let displayName = "익명의 사용자";
+  if (profileSnap.exists) {
+    const p = profileSnap.data() || {};
+    if (typeof p.nickname === "string" && p.nickname.trim() !== "") {
+      displayName = p.nickname.trim();
+    }
+  }
   // 감정 점수 검증
   const emotionScores = data.emotionScores;
   if (typeof emotionScores !== "object" || emotionScores === null) {
@@ -139,9 +143,12 @@ exports.requestMatch = onCall(async (request) => {
 
     // 매칭 조건: 상대의 같은 감정 점수가 나의 topScore 이상
     if (theirScore >= topScore) {
+      const dName =typeof t.displayName === "string" && t.displayName.trim() !== ""
+          ? t.displayName.trim()
+          : "익명의 사용자";
       candidates.push({
         uid: otherUid,
-        displayName: t.displayName || null,
+        displayName: dName,
         topTwoEmotions: Array.isArray(t.topTwoEmotions) ?
           t.topTwoEmotions :
           [],
@@ -231,28 +238,28 @@ exports.createChatRoom = onCall(async (request) => {
     ]);
 
     const memberDisplayNames = {};
-
+    //my
     if (mySnap.exists) {
       const d = mySnap.data() || {};
-      memberDisplayNames[myUid] =
-        d.nickname ||
-        d.name ||
-        (d.email && d.email.split("@")[0]) ||
-        "사용자";
+      if (typeof d.nickname === "string" && d.nickname.trim() !== "") {
+        memberDisplayNames[myUid] = d.nickname.trim();
+      } else {
+        memberDisplayNames[myUid] = "익명의 사용자";
+      }
     } else {
-      memberDisplayNames[myUid] = "사용자";
+      memberDisplayNames[myUid] = "익명의 사용자";
     }
-
-    let otherDisplayNameDB = "사용자";
+    //other
     if (otherSnap.exists) {
       const d = otherSnap.data() || {};
-      otherDisplayNameDB =
-        d.nickname ||
-        d.name ||
-        (d.email && d.email.split("@")[0]) ||
-        "사용자";
+      if (typeof d.nickname === "string" && d.nickname.trim() !== "") {
+        memberDisplayNames[otherUid] = d.nickname.trim();
+      } else {
+        memberDisplayNames[otherUid] = "익명의 사용자";
+      }
+    } else {
+      memberDisplayNames[otherUid] = "익명의 사용자";
     }
-    memberDisplayNames[otherUid] = otherDisplayNameDB;
 
     await roomRef.set({
       pairKey,
