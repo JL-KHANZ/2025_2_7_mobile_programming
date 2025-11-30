@@ -97,7 +97,8 @@
             android:padding="20dp"
             app:layout_constraintBottom_toTopOf="@id/daily_3_btn_home"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            android:background="@drawable/rounded_button_purple"/>
 
         <ImageButton
             android:id="@+id/daily_3_btn_home"

@@ -2,156 +2,213 @@ package com.example.mobile_programming_2025_2.ui;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.graphics.SweepGradient;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
-import static java.lang.Math.atan2;
-import static java.lang.Math.cos;
-import static java.lang.Math.min;
-import static java.lang.Math.sin;
+import com.example.mobile_programming_2025_2.R;
 
 public class CircularSliderView extends View {
 
+    private Paint arcPaint;
+    private Paint thumbPaint;
+    private Paint backgroundPaint;
+
+    private RectF arcRect;
+
+    private float centerX;
+    private float centerY;
+    private float radius;
+    private float strokeWidth = 60f; // 휠 두께
+
+    private float currentAngle = 0f;  // 현재 각도 (0-360)
+    private float currentValue = 0f;  // 현재 값 (0-100)
+
+    private boolean isDragging = false;
+
+    // 감정 색상 배열
+    private int[] emotionColors;
+
     public interface OnValueChangeListener {
-        void onValueChanged(int value); // 0..100
+        void onValueChange(float value);
     }
 
     private OnValueChangeListener listener;
 
-    private final Paint trackPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final Paint progressPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final Paint thumbPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    public CircularSliderView(Context context) {
+        super(context);
+        init(context);
+    }
 
-    private float cx, cy;           // center
-    private float radius;           // track radius
-    private float strokeWidth;      // track thickness
-    private float thumbRadius;      // knob size
+    public CircularSliderView(Context context, @Nullable AttributeSet attrs) {
+        super(context, attrs);
+        init(context);
+    }
 
-    private final RectF arcBounds = new RectF();
+    public CircularSliderView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        init(context);
+    }
 
-    private int value = 0;          // 0..100
-    private float angleDeg = -90f;  // -90° at top (12 o’clock)
+    private void init(Context context) {
+        // XML 색상 가져오기
+        emotionColors = new int[] {
+                ContextCompat.getColor(context, R.color.joy_color),
+                ContextCompat.getColor(context, R.color.love_color),
+                ContextCompat.getColor(context, R.color.trust_color),
+                ContextCompat.getColor(context, R.color.submission_color),
+                ContextCompat.getColor(context, R.color.fear_color),
+                ContextCompat.getColor(context, R.color.awe_color),
+                ContextCompat.getColor(context, R.color.surprise_color),
+                ContextCompat.getColor(context, R.color.disapproval_color),
+                ContextCompat.getColor(context, R.color.sadness_color),
+                ContextCompat.getColor(context, R.color.remorse_color),
+                ContextCompat.getColor(context, R.color.disgust_color),
+                ContextCompat.getColor(context, R.color.contempt_color),
+                ContextCompat.getColor(context, R.color.anger_color),
+                ContextCompat.getColor(context, R.color.aggressiveness_color),
+                ContextCompat.getColor(context, R.color.anticipation_color),
+                ContextCompat.getColor(context, R.color.optimism_color)
+        };
 
-    public CircularSliderView(Context c) { this(c, null); }
-    public CircularSliderView(Context c, @Nullable AttributeSet a) { super(c, a); init(); }
+        backgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        backgroundPaint.setStyle(Paint.Style.STROKE);
+        backgroundPaint.setStrokeWidth(strokeWidth);
+        backgroundPaint.setColor(Color.parseColor("#E0E0E0"));
+        backgroundPaint.setStrokeCap(Paint.Cap.ROUND);
 
-    private void init() {
-        strokeWidth = dp(25);
-        thumbRadius = dp(20);
+        arcPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        arcPaint.setStyle(Paint.Style.STROKE);
+        arcPaint.setStrokeWidth(strokeWidth);
+        arcPaint.setStrokeCap(Paint.Cap.ROUND);
 
-        trackPaint.setStyle(Paint.Style.STROKE);
-        trackPaint.setStrokeWidth(strokeWidth);
-        trackPaint.setColor(0xFFE0E0E0); // light gray
-        trackPaint.setStrokeCap(Paint.Cap.ROUND);
-
-        progressPaint.setStyle(Paint.Style.STROKE);
-        progressPaint.setStrokeWidth(strokeWidth);
-        progressPaint.setColor(0xFF6200EE); // accent
-        progressPaint.setStrokeCap(Paint.Cap.ROUND);
-
+        thumbPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         thumbPaint.setStyle(Paint.Style.FILL);
-        thumbPaint.setColor(0xFF6200EE);
-    }
+        thumbPaint.setColor(Color.WHITE);
+        thumbPaint.setShadowLayer(8f, 0, 4f, Color.parseColor("#40000000"));
 
-    public void setOnValueChangeListener(OnValueChangeListener l) { this.listener = l; }
-
-    public void setValue(int v) {
-        v = Math.max(0, Math.min(100, v));
-        if (this.value != v) {
-            this.value = v;
-            this.angleDeg = valueToAngle(v);
-            invalidate();
-            if (listener != null) listener.onValueChanged(this.value);
-        }
-    }
-
-    public int getValue() { return value; }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int w = MeasureSpec.getSize(widthMeasureSpec);
-        int h = MeasureSpec.getSize(heightMeasureSpec);
-        int size = Math.min(w, h); // keep it square
-        setMeasuredDimension(size, size);
+        setLayerType(LAYER_TYPE_SOFTWARE, thumbPaint);
+        arcRect = new RectF();
     }
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        cx = w / 2f;
-        cy = h / 2f;
-        radius = (min(w, h) / 2f) - strokeWidth - thumbRadius;
-        arcBounds.set(cx - radius, cy - radius, cx + radius, cy + radius);
+        super.onSizeChanged(w, h, oldw, oldh);
+        centerX = w / 2f;
+        centerY = h / 2f;
+        radius = Math.min(w, h) / 2f - strokeWidth;
+        float padding = strokeWidth / 2f;
+        arcRect.set(padding, padding, w - padding, h - padding);
+        createGradient();
+    }
+
+    private void createGradient() {
+        int[] gradientColors = new int[emotionColors.length + 1];
+        System.arraycopy(emotionColors, 0, gradientColors, 0, emotionColors.length);
+        gradientColors[emotionColors.length] = emotionColors[0];
+        SweepGradient gradient = new SweepGradient(centerX, centerY, gradientColors, null);
+        arcPaint.setShader(gradient);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        canvas.drawCircle(centerX, centerY, radius, backgroundPaint);
 
-        // draw track
-        canvas.drawOval(arcBounds, trackPaint);
+        canvas.save();
+        canvas.rotate(-90, centerX, centerY);
+        canvas.drawCircle(centerX, centerY, radius, arcPaint);
+        canvas.restore();
 
-        // draw progress arc from -90° (top) to current angle
-        float sweep = normalizeSweep(angleDeg + 90f);
-        if (sweep > 0f) {
-            // canvas.drawArc(arcBounds, -90f, sweep, false, progressPaint);
-        }
+        float thumbAngle = currentAngle - 90;
+        float thumbX = centerX + (float) (radius * Math.cos(Math.toRadians(thumbAngle)));
+        float thumbY = centerY + (float) (radius * Math.sin(Math.toRadians(thumbAngle)));
 
-        // draw thumb at current angle
-        float rad = (float) Math.toRadians(angleDeg);
-        float tx = cx + (float) cos(rad) * radius;
-        float ty = cy + (float) sin(rad) * radius;
-        canvas.drawCircle(tx, ty, thumbRadius, thumbPaint);
+        Paint thumbBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        thumbBgPaint.setStyle(Paint.Style.FILL);
+        thumbBgPaint.setColor(getCurrentColor());
+        canvas.drawCircle(thumbX, thumbY, 32f, thumbBgPaint);
+        canvas.drawCircle(thumbX, thumbY, 28f, thumbPaint);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        switch (event.getActionMasked()) {
+        float x = event.getX();
+        float y = event.getY();
+        switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-            case MotionEvent.ACTION_MOVE: {
-                float x = event.getX() - cx;
-                float y = event.getY() - cy;
-                float ang = (float) Math.toDegrees(atan2(y, x));
-                // convert to -90..270 mapping (0 at top)
-                float deg = ang;
-                // clamp to 0..360 sweep as value
-                float val = angleToValue(deg);
-                this.value = (int) Math.round(val);
-                this.angleDeg = valueToAngle(this.value);
-                invalidate();
-                if (listener != null) listener.onValueChanged(this.value);
-                return true;
-            }
+                if (isNearThumb(x, y)) {
+                    isDragging = true;
+                    updateAngle(x, y);
+                    return true;
+                }
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (isDragging) {
+                    updateAngle(x, y);
+                    getParent().requestDisallowInterceptTouchEvent(true);
+                    return true;
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                isDragging = false;
+                getParent().requestDisallowInterceptTouchEvent(false);
+                break;
         }
         return super.onTouchEvent(event);
     }
 
-    private float valueToAngle(int v) {
-        // v:0..100 -> angle:-90..270 (0 at top, clockwise)
-        return -90f + (v / 100f) * 360f;
+    private boolean isNearThumb(float x, float y) {
+        float thumbAngle = currentAngle - 90;
+        float thumbX = centerX + (float) (radius * Math.cos(Math.toRadians(thumbAngle)));
+        float thumbY = centerY + (float) (radius * Math.sin(Math.toRadians(thumbAngle)));
+        float distance = (float) Math.sqrt(Math.pow(x - thumbX, 2) + Math.pow(y - thumbY, 2));
+        return distance <= 100f;
     }
 
-    private float angleToValue(float deg) {
-        // deg in [-180..180] from atan2; map to 0..360 starting from -90 at 0%
-        float normalized = deg - (-90f); // shift so -90 -> 0
-        while (normalized < 0f) normalized += 360f;
-        while (normalized >= 360f) normalized -= 360f;
-        return (normalized / 360f) * 100f;
+    private void updateAngle(float x, float y) {
+        float dx = x - centerX;
+        float dy = y - centerY;
+        float angle = (float) Math.toDegrees(Math.atan2(dy, dx)) + 90;
+        if (angle < 0) angle += 360;
+        currentAngle = angle;
+        currentValue = (angle / 360f) * 100f;
+        invalidate();
+        if (listener != null) listener.onValueChange(currentValue);
     }
 
-    private float normalizeSweep(float sweep) {
-        // sweep must be 0..360
-        float s = sweep;
-        while (s < 0f) s += 360f;
-        while (s > 360f) s -= 360f;
-        return s;
+    public int getCurrentColor() {
+        if (emotionColors == null || emotionColors.length == 0) return Color.WHITE;
+        float ratio = currentAngle / 360f;
+        int numColors = emotionColors.length;
+        float colorIndex = ratio * numColors;
+        int index1 = (int) colorIndex % numColors;
+        int index2 = (index1 + 1) % numColors;
+        float blend = colorIndex - (int) colorIndex;
+        return blendColors(emotionColors[index1], emotionColors[index2], blend);
     }
 
-    private float dp(float v) {
-        return v * getResources().getDisplayMetrics().density;
+    private int blendColors(int color1, int color2, float ratio) {
+        float inverseRatio = 1f - ratio;
+        float r = (Color.red(color1) * inverseRatio) + (Color.red(color2) * ratio);
+        float g = (Color.green(color1) * inverseRatio) + (Color.green(color2) * ratio);
+        float b = (Color.blue(color1) * inverseRatio) + (Color.blue(color2) * ratio);
+        return Color.rgb((int) r, (int) g, (int) b);
+    }
+
+    public void setOnValueChangeListener(OnValueChangeListener listener) {
+        this.listener = listener;
+    }
+
+    public int getCurrentEmotionColor() {
+        return getCurrentColor();
     }
 }

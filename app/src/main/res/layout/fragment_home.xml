@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -9,58 +8,145 @@
     android:paddingBottom="70dp"
     tools:context=".ui.home.HomeFragment">
 
-    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/homeContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".ui.home.HomeFragment"
-        >
+        android:layout_height="wrap_content"
+        android:paddingBottom="50dp">
 
         <TextView
             android:id="@+id/text_home"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAlignment="center"
-            android:textSize="30sp"
-            android:layout_marginVertical="30sp"
+            android:layout_marginTop="30dp"
             android:text="@string/home_welcome"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            android:textAlignment="center"
+            android:textSize="24sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintVertical_chainStyle="packed" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-<!--        <com.example.mobile_programming_2025_2.ui.GooglyEyesView-->
-<!--            android:id="@+id/googlyEyes"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="200dp"-->
-<!--            android:layout_margin="16dp"-->
-<!--            app:layout_constraintTop_toBottomOf="@+id/text_home"-->
-<!--            app:layout_constraintBottom_toTopOf="@+id/daily_entry_widget_home"-->
-<!--            app:layout_constraintStart_toStartOf="parent"-->
-<!--            app:layout_constraintEnd_toEndOf="parent" />-->
-
-        <com.example.mobile_programming_2025_2.ui.widgets.WidgetDailyEntry
-            android:id="@+id/daily_entry_widget_home"
+        <TextView
+            android:id="@+id/text_no_record_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="아직 오늘의 감정이 기록되지 않았습니다."
+            android:textSize="16sp"
+            android:textColor="#666666"
+            android:layout_marginTop="10dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/text_home"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <LinearLayout
+            android:id="@+id/before_analysis_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginTop="150dp"
+            app:layout_constraintTop_toBottomOf="@id/text_home"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <TextView
+                android:id="@+id/textEmotion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="기쁨"
+                android:textColor="#8B5CF6"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                android:visibility="invisible" />
+
+            <FrameLayout
+                android:id="@+id/emotionWheelContainer"
+                android:layout_width="340dp"
+                android:layout_height="340dp"
+                android:layout_marginTop="20dp">
+                <com.example.mobile_programming_2025_2.ui.GooglyEyesView
+                    android:id="@+id/googlyEyesHome"
+                    android:layout_width="280dp"
+                    android:layout_height="280dp"
+                    android:layout_gravity="center" />
+                <com.example.mobile_programming_2025_2.ui.CircularSliderView
+                    android:id="@+id/emotionSlider"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+            </FrameLayout>
+
+            <Button
+                android:id="@+id/daily_button"
+                android:layout_width="220dp"
+                android:layout_height="60dp"
+                android:layout_marginTop="40dp"
+                android:layout_marginBottom="50dp"
+                android:background="@drawable/rounded_button_purple"
+                android:text="감정 기록하기"
+                android:textColor="@color/white"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/after_analysis_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="top"
+            android:paddingTop="20dp"
+            android:visibility="gone"
             app:layout_constraintTop_toBottomOf="@id/text_home"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            />
+            app:layout_constraintStart_toStartOf="parent">
 
-        <Button
-            android:id="@+id/daily_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/home_test_button_text"
-            android:textSize="25sp"
-            android:padding="30dp"
-            android:textColor="?attr/colorOnPrimary"
-            android:layout_marginBottom="20sp"
+            <com.example.mobile_programming_2025_2.ui.widgets.WidgetDailyEntry
+                android:id="@+id/daily_entry_widget_home"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <com.example.mobile_programming_2025_2.ui.BubbleTriangleView
+            android:id="@+id/bubble_triangle_view"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
+
+        <LinearLayout
+            android:id="@+id/today_emoji_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="gone"
+
+            android:layout_marginTop="400dp"
+            app:layout_constraintTop_toBottomOf="@id/text_home"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <com.example.mobile_programming_2025_2.ui.GooglyEyesView
+                    android:id="@+id/googlyEyesResult"
+                    android:layout_width="280dp"
+                    android:layout_height="280dp"
+                    android:layout_gravity="center" />
+                <View
+                    android:id="@+id/pop_click_target"
+                    android:layout_width="280dp"
+                    android:layout_height="280dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true" />
+            </FrameLayout>
+        </LinearLayout>
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

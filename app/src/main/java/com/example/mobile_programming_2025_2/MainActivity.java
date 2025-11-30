@@ -1,5 +1,7 @@
 package com.example.mobile_programming_2025_2;
 
+import android.content.Intent;
+import android.content.SharedPreferences; // 추가
 import android.os.Bundle;
 import android.view.MotionEvent;
 
@@ -26,6 +28,18 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // ⭐️ 1. 앱 시작 시 로그인 상태 확인 (이 부분이 추가됨)
+        SharedPreferences prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE);
+        boolean isLoggedIn = prefs.getBoolean("isLoggedIn", false);
+
+        if (!isLoggedIn) {
+            // 로그인이 안 되어 있으면 LoginActivity로 쫓아냄
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+            finish(); // MainActivity 종료
+            return;   // 아래 코드 실행 안 함
+        }
+
         LocalRepository localRepository = new LocalRepository(new DailyEntryService());
         MainViewModelFactory mainViewModelFactory = new MainViewModelFactory(localRepository);
         MainViewModel mainViewModel = new ViewModelProvider(this, mainViewModelFactory).get(MainViewModel.class);
@@ -49,11 +63,9 @@ public class MainActivity extends AppCompatActivity {
         mainViewModel.fetchTodayData();
         mainViewModel.getTodayEntryData().observe(this, dailyEntry -> {
             if (dailyEntry != null) {
-                // Update UI with the daily entry data
                 // bubblesBackgroundView.setBubbleColor(dailyEntry.getColor());
             }
         });
-
     }
 
     @Override
@@ -65,7 +77,6 @@ public class MainActivity extends AppCompatActivity {
                 eyes.lookAtRaw(ev.getRawX(), ev.getRawY());
             }
         }
-        return super.dispatchTouchEvent(ev); // don't consume; let app handle touches normally
+        return super.dispatchTouchEvent(ev);
     }
-
 }

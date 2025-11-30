@@ -1,6 +1,7 @@
 package com.example.mobile_programming_2025_2;
 
 import android.content.Intent;
+import android.content.SharedPreferences; // 추가
 import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -16,26 +17,26 @@ public class LoginActivity extends AppCompatActivity {
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-//        if (/* already logged in, e.g., valid token */) {
-//            startActivity(new Intent(this, MainActivity.class)
-//                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
-//            return;
-//        }
+
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
+
         findViewById(R.id.btnLogin).setOnClickListener(v -> {
             String email = etEmail.getText().toString().trim();
             String pwd   = etPassword.getText().toString();
 
-            // TODO: validate credentials / call API
             LoginService authService = new LoginService();
             authService.login(email, pwd, resultCode -> {
-            System.out.println("resultCode =>" + resultCode);
+                System.out.println("resultCode =>" + resultCode);
                 switch (resultCode) {
                     case 0:
-                        // 로그인 성공
-                        //
-                        startActivity(new Intent(this, MainActivity.class));
+                        // ⭐️ 로그인 성공! -> 기록 남기기 (이 부분이 추가됨)
+                        SharedPreferences prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putBoolean("isLoggedIn", true);
+                        editor.apply(); // 저장!
+
+                        // 메인으로 이동
                         Intent i = new Intent(LoginActivity.this, MainActivity.class);
                         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(i);
@@ -53,12 +54,6 @@ public class LoginActivity extends AppCompatActivity {
                         Toast.makeText(this, "로그인 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show();
                 }
             });
-
-
-
-
-
-
         });
 
         //회원가입
@@ -67,6 +62,5 @@ public class LoginActivity extends AppCompatActivity {
             go.setOnClickListener(v ->
                     startActivity(new Intent(this, SignUpActivity.class)));
         }
-
     }
 }
