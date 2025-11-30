@@ -74,20 +74,6 @@ public class UserFragment extends Fragment {
             showEditProfileDialog(textUsername, textUsernickname);
         });
 
-        // -------------------------------------------------------
-        // 1. 닉네임 변경 패널 (열기/닫기)
-        // -------------------------------------------------------
-        binding.nicknameChangeHeader.setOnClickListener(v -> {
-            View panel = binding.nicknameInlinePanel;
-
-            if (panel.getVisibility() == View.VISIBLE) {
-                panel.setVisibility(View.GONE);
-                binding.nicknameArrow.setRotation(0f);
-            } else {
-                panel.setVisibility(View.VISIBLE);
-                binding.nicknameArrow.setRotation(180f);
-            }
-        });
 
         // -------------------------------------------------------
         // 2. 비밀번호 변경 패널 (열기/닫기)
@@ -121,7 +107,6 @@ public class UserFragment extends Fragment {
         }
 
         loadUserProfile();
-        setupChangeNicknameButton(); // 닉네임 변경 기능 연결
         setupChangePasswordButton(); // 비밀번호 변경 기능 연결
 
         return root;
@@ -248,7 +233,6 @@ public class UserFragment extends Fragment {
                         binding.textUsernickname.setText("닉네임 설정");
                     }
 
-                    if (profile.uid != null) binding.textUserid.setText(profile.uid);
                     if (profile.email != null) binding.textUseremail.setText(profile.email);
                     currentProfileUrl = profile.photoURL;
                     if (profile.photoURL == null)
@@ -263,38 +247,6 @@ public class UserFragment extends Fragment {
                                 .into(binding.imageUser);
                 },
                 e -> Toast.makeText(requireContext(), "프로필 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show());
-    }
-
-    // 닉네임 변경 버튼 로직
-    private void setupChangeNicknameButton() {
-        binding.btnChangeNickname.setOnClickListener(v -> {
-            String newNickname = binding.editNewNickname.getText().toString().trim();
-
-            if (newNickname.isEmpty()) {
-                Toast.makeText(requireContext(), "새 닉네임을 입력해주세요", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            binding.btnChangeNickname.setEnabled(false);
-
-            userService.changeNickname(newNickname)
-                    .addOnSuccessListener(result -> {
-                        Toast.makeText(requireContext(), result.message, Toast.LENGTH_SHORT).show();
-                        if (result.success) {
-                            // 성공 시 UI 즉시 반영
-                            binding.textUsernickname.setText(newNickname);
-                            binding.editNewNickname.setText("");
-                            binding.nicknameInlinePanel.setVisibility(View.GONE);
-                            binding.nicknameArrow.setRotation(0f);
-                        }
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(requireContext(), "닉네임 변경 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    })
-                    .addOnCompleteListener(t -> {
-                        binding.btnChangeNickname.setEnabled(true);
-                    });
-        });
     }
 
     // 비밀번호 변경 버튼 로직
