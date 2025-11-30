@@ -1,11 +1,18 @@
 // const functions = require("firebase-functions"); // 이건 v1버전
 const {onCall, HttpsError} = require("firebase-functions/v2/https"); // v2버전으로 통일(헷갈리면 안됨)
+const {onSchedule} = require("firebase-functions/v2/scheduler");// 스케줄러
 const admin = require("firebase-admin");
 
 if (!admin.apps.length) {
   admin.initializeApp();
 }
 const db = admin.firestore();
+// 날짜 기준으로 문서 삭제하기 위해서
+function getTodayKeyKST() {
+  const now = new Date(); // UTC0
+  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000); // +9시간 (한국 utc+9이여서)
+  return kst.toISOString().slice(0, 10); // "YYYY-MM-DD"
+}
 
 // 감정 점수 Map에서 topEmotion + topTwoEmotions 계산
 function getTopEmotions(emotionScores) {
@@ -93,6 +100,7 @@ exports.requestMatch = onCall(async (request) => {
 
   const now = admin.firestore.FieldValue.serverTimestamp();
   const ticketRef = db.collection("matchTickets").doc(uid);
+  const dayKey = getTodayKeyKST();
 
   // 내 티켓 업서트 (uid를 ticketId처럼 쓰는 구조)
   await ticketRef.set(
@@ -103,16 +111,18 @@ exports.requestMatch = onCall(async (request) => {
         topEmotion,
         topTwoEmotions, // ["기쁨", "신뢰"] 등
         status: "OPEN",
+        dayKey,
         createdAt: now,
         updatedAt: now,
       },
       {merge: true},
   );
 
-  // OPEN 상태의 다른 티켓 조회
+  // OPEN 상태,오늘(daykey)의 다른 티켓 조회
   const snap = await db
       .collection("matchTickets")
       .where("status", "==", "OPEN")
+      .where("dayKey", "==", dayKey)
       .get();
 
   const candidates = [];
@@ -187,6 +197,7 @@ exports.createChatRoom = onCall(async (request) => {
 
   const roomsRef = db.collection("chatRooms");
   const now = admin.firestore.FieldValue.serverTimestamp();
+  const dayKey = getTodayKeyKST();
 
   // 기존 OPEN 방 있는지 조회
   const existingSnap = await roomsRef
@@ -251,6 +262,7 @@ exports.createChatRoom = onCall(async (request) => {
       },
       memberDisplayNames,
       status: "OPEN",
+      dayKey,
       createdAt: now,
       updatedAt: now,
     });
@@ -321,6 +333,7 @@ exports.getActiveChatRoom = onCall(async (request) => {
   }
 
   const uid = request.auth.uid;
+  const todayKey = getTodayKeyKST();
 
   // 내 profile/info 에서 activeRoomId 읽기
   const profileRef = db.doc(`users/${uid}/profile/info`);
@@ -349,6 +362,9 @@ exports.getActiveChatRoom = onCall(async (request) => {
   const room = roomSnap.data() || {};
 
   if (room.status !== "OPEN") {
+    return {hasRoom: false};
+  }
+  if (room.dayKey !== todayKey) {
     return {hasRoom: false};
   }
 
@@ -462,3 +478,139 @@ exports.closeChatRoom = onCall(async (request) => {
 
   return {success: true};
 });
+// ========================================================================스케줄러
+/**
+매일 3시(서울) 기준으로 티켓,채팅방 등에서 dayKey 기준 데이터 삭제
+관련된 활성화 된 방 초기화 및 roomId 삭제
+ */
+exports.cleanupOldMatchData = onSchedule(
+    {
+      schedule: "0 3 * * *", // 매일 03:00
+      timeZone: "Asia/Seoul", // 현재는 서울 기준
+    },
+    async (event) => {
+      const todayKey = getTodayKeyKST();
+      console.log("[cleanupOldMatchData] START, todayKey =", todayKey);
+
+      // 오래된 matchTickets 삭제
+      try {
+        const ticketsCol = db.collection("matchTickets");
+
+        // dayKey < todayKey (어제)인 예전 티켓들
+        const oldTicketsSnap = await ticketsCol
+            .where("dayKey", "<", todayKey)
+            .get();
+
+        console.log(
+            "[cleanupOldMatchData] old matchTickets count =",
+            oldTicketsSnap.size,
+        );
+
+        for (const doc of oldTicketsSnap.docs) {
+          console.log(
+              "[cleanupOldMatchData] delete matchTicket",
+              doc.id,
+              doc.data().dayKey,
+          );
+          await doc.ref.delete();
+        }
+
+        // 이전 버전에서 작성된 dayKey 없는 티켓들 삭제
+        const legacyTicketsSnap = await ticketsCol
+            .where("dayKey", "==", null)
+            .get();
+
+        console.log(
+            "[cleanupOldMatchData] legacy matchTickets(without dayKey) count =",
+            legacyTicketsSnap.size,
+        );
+
+        for (const doc of legacyTicketsSnap.docs) {
+          console.log(
+              "[cleanupOldMatchData] delete legacy matchTicket",
+              doc.id,
+          );
+          await doc.ref.delete();
+        }
+      } catch (e) {
+        console.error("[cleanupOldMatchData] error while cleaning matchTickets", e);
+      }
+
+      //  오래된 chatRooms + RTDB 삭제
+      try {
+        const roomsCol = db.collection("chatRooms");
+
+        // dayKey < todayKey 인 방들(전날 이전의 모든 방)
+        const oldRoomsSnap = await roomsCol
+            .where("dayKey", "<", todayKey)
+            .get();
+
+        console.log(
+            "[cleanupOldMatchData] old chatRooms count =",
+            oldRoomsSnap.size,
+        );
+
+        const rtdb = admin.database();
+
+        for (const roomDoc of oldRoomsSnap.docs) {
+          const roomId = roomDoc.id;
+          const roomData = roomDoc.data() || {};
+          const members = roomData.members || {};
+          const memberUids = Object.keys(members);
+          console.log(
+              "[cleanupOldMatchData] processing chatRoom",
+              roomId,
+              "dayKey=",
+              roomData.dayKey,
+              "members=",
+              memberUids,
+          );
+
+          const nowTs = admin.firestore.FieldValue.serverTimestamp();
+          const batch = db.batch();
+
+          // 각 멤버 프로필의 activeRoomId 초기화
+          memberUids.forEach((uid) => {
+            const profileRef = db.doc(`users/${uid}/profile/info`);
+            batch.set(
+                profileRef,
+                {
+                  activeRoomId: null,
+                  updatedAt: nowTs,
+                },
+                {merge: true},
+            );
+          });
+
+          // 방 문서 삭제
+          batch.delete(roomDoc.ref);
+
+          // Firestore 쪽 커밋
+          await batch.commit();
+          console.log(
+              "[cleanupOldMatchData] Firestore room deleted:",
+              roomId,
+          );
+
+          // Realtime DB의 채팅 메시지 삭제
+          try {
+            await rtdb.ref(`chatMessages/${roomId}`).remove();
+            console.log(
+                "[cleanupOldMatchData] RTDB messages deleted for room",
+                roomId,
+            );
+          } catch (e) {
+            console.error(
+                "[cleanupOldMatchData] RTDB delete failed for room",
+                roomId,
+                e,
+            );
+          }
+        }
+      } catch (e) {
+        console.error("[cleanupOldMatchData] error while cleaning chatRooms", e);
+      }
+
+      console.log("[cleanupOldMatchData] DONE");
+    },
+);
